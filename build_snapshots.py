@@ -37,7 +37,8 @@ for i,code in enumerate(stocks,1):
         if endpoint=="candles":
             for rng in ("1mo","3mo","6mo","1y"):
                 p=urllib.parse.urlencode({"code":code,"range":rng})
-                dump(f"candles_{code}_{rng}",call("/api/candles?"+p))
+filename={"1mo":"1m","3mo":"3m","6mo":"6m","1y":"1y"}[rng]
+dump(f"candles_{code}_{filename}",call("/api/candles?"+p))
         else:
             dump(f"{endpoint}_{code}",call("/api/"+endpoint+"?"+urllib.parse.urlencode(params)))
 for symbol in ("^N225","^TOPX","^SOX","^FANG","^N225","^TOPX","^N225","^TOPX"):
