@@ -1,0 +1,1737 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V14.49 制度信用ダッシュボード</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e9edf2;color:#151b26;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+.w{max-width:1280px;margin:0 auto;padding:24px 28px 42px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px}.v{font-size:13px;color:#445064;font-weight:700}.hero b{font-size:13px;color:#445064}
+.tabs{display:flex;gap:8px;justify-content:flex-end;margin:0 0 12px;overflow:auto}.tab,.btn{border:0;border-radius:9px;padding:10px 16px;font-weight:850;cursor:pointer}.tab{background:#fff;border:1px solid #d8dde6;white-space:nowrap}.tab.on,.btn{background:#111827;color:#fff}
+.bar{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-bottom:8px}.status{font-size:12px;color:#445064}
+.name{font-size:28px;font-weight:950;margin:4px 0}.date{font-size:12px;color:#7b8494;margin-bottom:14px}
+.k{display:none}
+.two{display:grid;grid-template-columns:minmax(0,2.08fr) minmax(330px,.76fr);gap:12px;align-items:stretch}
+.panel{background:#fff;border:1px solid #c9d1dc;border-radius:14px;padding:18px}
+.two>.panel:first-child{min-height:420px}.two>.panel:first-child>b{font-size:16px}
+canvas{width:100%;height:355px;display:block;margin-top:10px}
+.two>.panel:nth-child(2){position:relative;padding:18px}
+.two>.panel:nth-child(2)>b{font-size:13px;color:#445064}
+.two>.panel:nth-child(2)::before{content:"最新取得";display:block;font-size:12px;color:#7b8494;margin-bottom:4px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.fact{background:#f7f8fa;padding:12px;border-radius:9px}.fact b{display:block;margin-top:4px;font-size:17px}.lab{font-size:11px;color:#536176}.note{font-size:10px;color:#8a93a1;margin-top:10px}
+.summary{background:#fff;border:1px solid #c9d1dc;border-radius:14px;padding:18px;margin-bottom:12px}
+.sumTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.sumRatio .lab{font-size:12px}.sumRatio .num{font-size:45px;font-weight:1000;line-height:1.05;margin-top:5px}
+.balances{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.bal{background:#f7f8fa;border-radius:10px;padding:12px}.bal .num{font-size:20px;font-weight:950;margin-top:5px}
+.agg{border-top:1px solid #e5e7eb;margin-top:14px;padding-top:13px}.agg .num{font-size:20px;font-weight:950;margin-top:3px}
+.chg{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:900;margin-top:5px}.arrow{font-size:27px;line-height:.8;font-weight:1000}.up{color:#b42318}.down{color:#1565c0}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.metric{background:#fff;border:1px solid #c9d1dc;border-radius:12px;padding:15px}.metric .lab{font-size:12px}.metric b{display:block;font-size:21px;margin-top:5px}
+.tablePanel{background:#fff;border:1px solid #c9d1dc;border-radius:14px;padding:17px}.tablePanel>b{font-size:15px}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:9px}th,td{padding:10px 8px;border-bottom:1px solid #edf0f3;text-align:right}th{font-size:11px;color:#717b8b}th:first-child,td:first-child{text-align:left}
+@media(max-width:800px){.w{padding:12px}.tabs{justify-content:flex-start}.two{grid-template-columns:1fr}.two>.panel:first-child{min-height:330px}canvas{height:285px}.metrics{grid-template-columns:1fr 1fr}.name{font-size:24px}.sumRatio .num{font-size:40px}}
+.panel,.summary,.metric,.tablePanel{box-shadow:0 4px 14px #18223018}.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:12px;font-weight:800;color:#465266}.legend span{display:flex;align-items:center;gap:6px}.legend i{width:24px;height:4px;border-radius:3px;display:inline-block}.l1{background:#1769aa}.l2{background:#2f7d63}.l3{background:#a66b24}
+.earnBanner{background:#ead39a;border:1px solid #d8bd73;border-radius:13px;padding:14px 18px;margin:0 0 13px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 10px #6b53251a}
+.earnBanner span{display:block;font-size:11px;color:#66562e;font-weight:800}.earnBanner strong{display:block;font-size:22px;color:#171717;margin-top:2px}.earnBanner small{display:block;font-size:11px;color:#66562e;margin-top:2px}.earnBanner>b{font-size:24px;color:#171717}
+.sumRatio .num{font-size:52px!important;font-weight:1000!important}.bal .num{font-size:24px!important;font-weight:1000!important}.agg .num{font-size:24px!important;font-weight:1000!important}
+.metric b{font-size:24px!important;font-weight:1000!important}
+#tb td:nth-child(2){font-weight:1000;color:#111827;font-size:14px}
+#tb td:nth-child(3),#tb td:nth-child(4){font-weight:500}
+
+/* V9.5 requested layout refinements */
+.bal .num{white-space:nowrap;font-size:22px!important}
+#tb td:nth-child(2){font-weight:1000!important;color:#111827}
+#tb td:nth-child(3),#tb td:nth-child(4){font-weight:400!important;color:#273244}
+@media(max-width:800px){.bal .num{font-size:20px!important}}
+
+.sumRatio .num{font-size:46px!important}
+.sumRatio .chg .arrow{font-size:22px!important}
+.sumRatio .chg{font-size:15px!important}
+.bal .num{white-space:nowrap!important}
+.earnBanner.estimated{background:#f5e8bd;border-color:#d9c98e}
+.earnBanner.estimated #earnDays{font-size:18px}
+
+/* V9.7: desktop proportion + ratio/change + current price */
+@media(min-width:801px){
+  .sumRatio{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+            grid-template-areas:"label label" "num chg"!important;align-items:end!important;
+            column-gap:16px!important}
+  .sumRatio .label{grid-area:label!important}
+  .sumRatio .num{grid-area:num!important;font-size:43px!important;line-height:1!important;white-space:nowrap!important}
+  .sumRatio .chg{grid-area:chg!important;align-self:center!important;margin:0!important;
+                 white-space:nowrap!important;font-size:15px!important}
+  .sumRatio .chg .arrow{font-size:20px!important}
+}
+
+
+
+/* V12.3 PC CLEAN */
+.sumRatio .num{font-size:48px!important;font-weight:1000!important;letter-spacing:-1.1px!important}
+#rc{font-size:19px!important;font-weight:1000!important;white-space:nowrap!important}
+#rc .arrow{font-size:29px!important;font-weight:1000!important;margin-right:4px!important}
+@media(min-width:801px){.sumRatio{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"label label" "num chg"!important;column-gap:13px!important;align-items:center!important}.sumRatio .lab{grid-area:label!important}.sumRatio .num{grid-area:num!important;white-space:nowrap!important}#rc{grid-area:chg!important;margin:0!important;align-self:center!important}}
+.priceFact{padding:13px!important}.priceLine{display:flex;align-items:baseline;gap:12px;margin-top:5px;flex-wrap:wrap}.priceLine b{font-size:26px!important;font-weight:1000!important;margin:0!important}.pchg{font-size:17px;font-weight:1000;white-space:nowrap}.pchg.up{color:#d93b3b}.pchg.down{color:#176fd0}.priceNote{display:block;font-size:10px;color:#8a93a1;margin-top:3px}
+
+/* V12.3 visual pass: preserve V9.9 geometry */
+body{background:linear-gradient(180deg,#eaf1f7 0,#f5f7fa 330px,#eef2f6 100%)!important}
+.card,.panel{border-color:#b8c8d8!important;box-shadow:0 3px 12px rgba(31,55,82,.09)!important}
+.sumRatio{background:linear-gradient(180deg,#f8fbff,#edf6fd)!important;border-color:#a9c6df!important}
+.bal:nth-of-type(1){background:#fff9e9!important;border-color:#dfca92!important}
+.bal:nth-of-type(2){background:#eef9f3!important;border-color:#abd2bb!important}
+.fact{border:1px solid #c4d0dc!important;background:#f7f9fc!important}
+.priceFact{background:linear-gradient(180deg,#f2f8ff,#e8f3fd)!important;border-color:#9dbddb!important}
+.priceLine b,#priceNow{font-size:34px!important;font-weight:1000!important;letter-spacing:-.8px!important}
+#priceChg{font-size:19px!important;font-weight:1000!important}
+#dividendDates{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.divDate{border:1px solid #c8d3df;border-radius:9px;background:#fffdf4;padding:9px 10px}
+.divDate .dlabel{display:block;font-size:11px;font-weight:800;color:#58697b;margin-bottom:3px}
+.divDate .dvalue{display:block;font-size:16px;font-weight:1000;color:#172231;white-space:nowrap}
+#tb thead th{background:#dce9f5!important;border-bottom-color:#9fb4c8!important}
+#tb tbody tr:nth-child(even){background:#f7fafc!important}
+#tb tbody tr:hover{background:#edf5fb!important}
+@media(max-width:800px){.priceLine b,#priceNow{font-size:29px!important}#dividendDates{grid-template-columns:1fr}}
+
+
+/* V11 HOME */
+.homePage{max-width:1480px;margin:0 auto;padding:18px 20px 36px}
+.marketGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.marketCard{background:#fff;border:1px solid #bfd0df;border-radius:14px;padding:18px 20px;box-shadow:0 4px 14px rgba(31,55,82,.09)}
+.marketName{font-size:19px;font-weight:900;color:#10243d}
+.marketValue{font-size:31px;font-weight:1000;margin-top:9px;letter-spacing:-.7px}
+.marketChange{font-size:17px;font-weight:900;margin-top:5px}
+.up{color:#e83355}.down{color:#1769d2}
+.homeHead{display:flex;align-items:end;justify-content:space-between;margin:4px 0 12px}
+.homeTitle{font-size:28px;font-weight:1000;color:#10243d}
+.homeSub{font-size:12px;color:#708399}
+.watchTable{width:100%;border-collapse:separate;border-spacing:0 5px}
+.watchTable thead th{background:#38566f;color:#fff;padding:13px 16px;text-align:left;font-size:15px}
+.watchTable thead th:first-child{border-radius:10px 0 0 10px}
+.watchTable thead th:last-child{border-radius:0 10px 10px 0}
+.watchRow{cursor:pointer}
+.watchRow td{background:#fff;border-top:1px solid #d2dee8;border-bottom:1px solid #d2dee8;padding:15px 16px;vertical-align:middle}
+.watchRow td:first-child{border-left:1px solid #d2dee8;border-radius:11px 0 0 11px}
+.watchRow td:last-child{border-right:1px solid #d2dee8;border-radius:0 11px 11px 0}
+.watchRow:hover td{background:#edf6fd}
+.stockCode{font-size:22px;font-weight:1000;margin-right:16px}
+.stockName{font-size:18px;font-weight:900}
+.homeRatio{font-size:26px;font-weight:1000}
+.homeDelta{font-size:21px;font-weight:1000}
+.homePrice{font-size:22px;font-weight:1000}
+.homePriceChg{font-size:14px;font-weight:900;margin-top:3px}
+.detailBack{display:none;margin:0 auto 8px;max-width:1180px;padding:0 18px}
+.detailInnerBack{max-width:1180px;margin:8px auto;padding:0 18px}.detailInnerBack button{border:1px solid #9fb4c8;background:#fff;border-radius:9px;padding:8px 13px;font-weight:900;cursor:pointer}.detailBack button{border:1px solid #9fb4c8;background:#fff;border-radius:9px;padding:8px 13px;font-weight:900;cursor:pointer}
+@media(max-width:900px){
+ .marketGrid{grid-template-columns:repeat(2,1fr)}
+ .homePage{padding:12px}
+ .watchTable thead{display:none}
+ .watchTable,.watchTable tbody,.watchTable tr,.watchTable td{display:block;width:100%}
+ .watchRow{margin-bottom:10px}
+ .watchRow td{border-left:1px solid #d2dee8!important;border-right:1px solid #d2dee8!important;border-radius:0!important;padding:9px 13px}
+ .watchRow td:first-child{border-radius:11px 11px 0 0!important}
+ .watchRow td:last-child{border-radius:0 0 11px 11px!important}
+}
+
+
+/* V12.3 five-index preview */
+.marketGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+.marketCard{position:relative;min-width:0}
+.marketValue{white-space:nowrap}
+.sampleTag{font-size:10px;color:#8a98a8;margin-top:8px;font-weight:700}
+.spName{display:none}
+@media(max-width:900px){
+ .marketGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;margin-bottom:18px!important}
+ .marketCard{padding:8px 4px!important;border-radius:8px!important;text-align:center}
+ .marketName{font-size:10px!important;white-space:nowrap}
+ .marketValue{font-size:12px!important;letter-spacing:-.4px!important;margin-top:5px!important}
+ .marketChange{font-size:10px!important;margin-top:3px!important;white-space:nowrap}
+ .sampleTag{display:none}
+ .pcName{display:none}.spName{display:inline}
+}
+
+
+/* V12.3 polish */
+.homePage{padding-top:22px!important}
+.appHeader{min-height:64px;display:flex;align-items:center;justify-content:space-between;
+  margin:0 0 18px;padding:12px 18px;background:linear-gradient(100deg,#173a57,#315d7b);
+  color:#fff;border-radius:13px;box-shadow:0 5px 16px rgba(28,54,78,.15)}
+.appTitle{font-size:24px;font-weight:1000;letter-spacing:.02em}
+.appKicker{font-size:11px;opacity:.75;margin-top:2px;letter-spacing:.08em}
+.headerRight{display:flex;align-items:center;gap:12px;font-size:12px;white-space:nowrap}
+.headerRefresh{border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff;
+  border-radius:8px;padding:7px 11px;font-weight:900;cursor:pointer}
+.marketChange{font-size:20px!important;font-weight:1000!important;line-height:1.25}
+.watchTable{table-layout:fixed!important}
+.watchTable th:nth-child(1),.watchTable td:nth-child(1){width:37%}
+.watchTable th:nth-child(2),.watchTable td:nth-child(2){width:21%;text-align:center!important}
+.watchTable th:nth-child(3),.watchTable td:nth-child(3){width:20%;text-align:center!important}
+.watchTable th:nth-child(4),.watchTable td:nth-child(4){width:22%;text-align:right!important}
+.watchTable thead th:nth-child(4){padding-right:20px}
+.watchTable td:nth-child(4){padding-right:20px}
+@media(max-width:900px){
+ .appHeader{min-height:50px;padding:8px 10px;margin-bottom:10px}
+ .appTitle{font-size:15px}.appKicker{font-size:8px}
+ .headerRight{font-size:9px;gap:5px}.headerRefresh{padding:5px 7px;font-size:9px}
+ .marketChange{font-size:11px!important}
+ .watchTable{table-layout:auto!important}
+}
+
+
+/* V12 trading additions */
+.spark{width:100%;height:38px;display:block;margin-top:7px}
+.stockSearchBox{display:grid;grid-template-columns:minmax(280px,620px) 76px 1fr;gap:8px;align-items:center;margin:0 0 20px}
+.stockSearchBox input{height:42px;border:1px solid #aebfce;border-radius:9px;padding:0 13px;font-size:15px;background:#fff}
+.stockSearchBox button{height:42px;border:0;border-radius:9px;background:#315d7b;color:#fff;font-weight:900;cursor:pointer}
+#addStockBtn:disabled{opacity:.42;cursor:default} #searchMsg{font-size:12px;color:#708399}
+.watchTable th:nth-child(1),.watchTable td:nth-child(1){width:32%!important;text-align:left!important}
+.watchTable th:nth-child(2),.watchTable td:nth-child(2){width:17%!important;text-align:right!important}
+.watchTable th:nth-child(3),.watchTable td:nth-child(3){width:18%!important;text-align:center!important}
+.watchTable th:nth-child(4),.watchTable td:nth-child(4){width:17%!important;text-align:center!important}
+.watchTable th:nth-child(5),.watchTable td:nth-child(5){width:16%!important;text-align:center!important}
+.homeAbsPrice{font-size:22px;font-weight:1000}
+.homeAbsMove{font-size:17px;font-weight:1000;white-space:nowrap}
+@media(max-width:900px){
+ .stockSearchBox{grid-template-columns:1fr 58px;gap:5px;margin-bottom:12px}
+ #searchMsg{grid-column:1/-1}
+ .spark{height:20px;margin-top:3px}
+}
+
+
+/* V12.3 intraday charts */
+.marketCard{overflow:hidden}
+.spark{height:48px!important;margin-top:8px!important;border-radius:5px;background:#f8fbfd}
+.rowSpark{width:150px;height:46px;display:block;margin:auto;border-radius:5px;background:#f8fbfd}
+.watchTable th:nth-child(1),.watchTable td:nth-child(1){width:27%!important}
+.watchTable th:nth-child(2),.watchTable td:nth-child(2){width:14%!important}
+.watchTable th:nth-child(3),.watchTable td:nth-child(3){width:16%!important}
+.watchTable th:nth-child(4),.watchTable td:nth-child(4){width:16%!important;text-align:center!important}
+.watchTable th:nth-child(5),.watchTable td:nth-child(5){width:14%!important;text-align:center!important}
+.watchTable th:nth-child(6),.watchTable td:nth-child(6){width:13%!important;text-align:center!important}
+@media(max-width:900px){
+ .spark{height:22px!important}
+ .rowSpark{width:100%;height:32px}
+}
+
+
+/* V12.3 detail search + price trend */
+.detailSearchWrap{max-width:1180px;margin:0 auto 10px;padding:0 18px;display:flex;justify-content:flex-end;gap:6px;align-items:center}
+.detailSearchWrap input{width:330px;height:36px;border:1px solid #aebfce;border-radius:8px;padding:0 11px;background:#fff}
+.detailSearchWrap button{height:36px;border:0;border-radius:8px;padding:0 14px;background:#315d7b;color:#fff;font-weight:900;cursor:pointer}
+#detailSearchMsg{font-size:11px;color:#708399;min-width:80px}
+.priceChartBlock{margin-top:12px;padding-top:10px;border-top:1px solid #d7e2ea}
+.priceChartHead{display:flex;align-items:baseline;gap:10px;margin:0 4px 5px;color:#18344e}
+.priceChartHead b{font-size:16px}.priceChartHead span{font-size:11px;color:#7b8c9b}
+#priceCv{width:100%;height:150px;display:block}
+@media(max-width:900px){
+ .detailSearchWrap{padding:0 10px}.detailSearchWrap input{width:100%;min-width:0}
+ #detailSearchMsg{display:none}
+ #priceCv{height:120px}
+}
+
+
+/* V12.3: search sits directly above the individual stock title */
+.detailSearchWrap.detailSearchInline{
+  max-width:none!important;margin:12px 0 8px!important;padding:0!important;
+  display:flex!important;justify-content:flex-start!important;align-items:center!important;gap:6px!important;
+}
+.detailSearchInline input{width:340px!important}
+.detailSearchInline #detailSearchMsg{min-width:130px}
+#tabs{height:auto!important;min-height:0!important;flex-wrap:wrap!important}
+.tabs{height:auto!important;min-height:0!important;flex-wrap:wrap!important}
+@media(max-width:900px){
+ .detailSearchWrap.detailSearchInline{margin:9px 0 7px!important}
+ .detailSearchInline input{width:min(72vw,340px)!important}
+}
+
+
+/* V14.7: registered-stock daily move is intentionally larger on HOME only */
+#homePage .homePriceChg{
+  font-size:17px!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+@media(max-width:900px){
+  #homePage .homePriceChg{font-size:15px!important}
+}
+
+
+/* V14.7 daily margin view */
+.dailyHint{margin-left:10px;font-size:11px;font-weight:700;color:#71869a}
+
+
+/* V13 smooth drag: no extra table column */
+.watchTable{overflow:visible!important}
+.watchTable tbody,.watchTable tr{overflow:visible!important}
+.watchRow .stockIdentity{position:relative!important}
+.smoothHandle{
+  position:absolute;left:-31px;top:50%;transform:translateY(-50%);
+  display:grid;width:25px;height:31px;place-items:center;
+  border:1px solid #b8c6d0;border-radius:6px;background:#f4f7f9;color:#49697d;
+  font-size:21px;font-weight:900;line-height:1;cursor:grab;user-select:none;touch-action:none;
+  opacity:.78;transition:opacity .15s,background .15s,transform .15s;
+}
+.watchRow:hover .smoothHandle{opacity:1;background:#eaf2f6}
+.smoothHandle:active{cursor:grabbing}
+.orderSource{visibility:hidden!important}
+.orderPlaceholder td{
+  background:#eaf3f8!important;border:2px dashed #6e9db9!important;border-radius:8px!important;
+}
+.orderGhost{
+  position:fixed!important;z-index:9999!important;pointer-events:none!important;
+  display:table!important;opacity:.92!important;background:#fff!important;
+  box-shadow:0 12px 30px rgba(25,54,75,.22)!important;border-radius:8px!important;
+  transform:scale(1.008);transition:box-shadow .12s,transform .12s;
+}
+.orderGhost .smoothHandle{display:none!important}
+body.orderingNow{user-select:none!important;cursor:grabbing!important}
+@media(max-width:900px){.smoothHandle{left:-27px;width:22px}}
+
+
+/* V14.7 drag visual polish */
+.orderSource{
+  visibility:visible!important;
+  opacity:.28!important;
+  filter:saturate(.55)!important;
+  background:#f7fafc!important;
+  transition:opacity .16s ease,filter .16s ease,transform .16s ease!important;
+}
+.orderSource td{background:#f7fafc!important}
+.orderSource .smoothHandle{opacity:.18!important}
+
+.orderPlaceholder td{
+  position:relative!important;
+  background:rgba(232,243,249,.42)!important;
+  border:0!important;
+  border-radius:8px!important;
+  box-shadow:inset 0 2px 0 rgba(57,120,158,.65),inset 0 -1px 0 rgba(57,120,158,.10)!important;
+}
+.orderPlaceholder td:after{
+  content:"ここに移動";
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  font-size:10px;font-weight:800;letter-spacing:.04em;color:rgba(58,103,132,.62);
+}
+.orderGhost{
+  opacity:.94!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:0 14px 34px rgba(24,52,72,.22),0 2px 8px rgba(24,52,72,.10)!important;
+  border:1px solid rgba(120,153,174,.34)!important;
+  border-radius:9px!important;
+  transform:scale(1.006)!important;
+}
+body.orderingNow .watchRow:not(.orderSource){
+  transition:transform .14s ease,background .14s ease!important;
+}
+body.orderingNow .smoothHandle{transition:opacity .12s ease,background .12s ease!important}
+
+
+/* V14.7 Market Terminal polish: visual-only */
+#homePage .watchTable{
+  border-collapse:separate!important;
+  border-spacing:0 5px!important;
+}
+#homePage .watchTable thead th{
+  letter-spacing:.025em!important;
+  font-weight:800!important;
+}
+#homePage .watchRow{
+  transition:transform .14s ease,box-shadow .14s ease,background .14s ease!important;
+}
+#homePage .watchRow td{
+  background:rgba(255,255,255,.88)!important;
+  border-top:1px solid rgba(160,180,193,.22)!important;
+  border-bottom:1px solid rgba(160,180,193,.22)!important;
+}
+#homePage .watchRow td:first-child{
+  border-left:1px solid rgba(160,180,193,.22)!important;
+  border-radius:8px 0 0 8px!important;
+}
+#homePage .watchRow td:last-child{
+  border-right:1px solid rgba(160,180,193,.22)!important;
+  border-radius:0 8px 8px 0!important;
+}
+#homePage .watchRow:hover{
+  transform:translateY(-1px)!important;
+  box-shadow:0 5px 16px rgba(26,55,76,.075)!important;
+}
+#homePage .watchRow:hover td{background:#fbfdfe!important}
+
+#homePage .stockCode{
+  color:#6f8290!important;
+  font-size:.91em!important;
+  font-weight:750!important;
+  letter-spacing:.035em!important;
+}
+#homePage .stockName{
+  color:#172c3c!important;
+  font-weight:900!important;
+  margin-left:9px!important;
+}
+#homePage .price{
+  color:#102838!important;
+  font-weight:900!important;
+  letter-spacing:.01em!important;
+}
+#homePage .ratio{
+  color:#102838!important;
+  font-weight:950!important;
+  letter-spacing:.01em!important;
+}
+
+#homePage .smoothHandle{
+  opacity:.52!important;
+  border-color:transparent!important;
+  background:transparent!important;
+  color:#698090!important;
+  transition:opacity .14s ease,background .14s ease,border-color .14s ease,transform .14s ease!important;
+}
+#homePage .watchRow:hover .smoothHandle{
+  opacity:1!important;
+  background:#eef4f7!important;
+  border-color:#c7d4dc!important;
+  transform:translateY(-50%) scale(1.04)!important;
+}
+#homePage .orderGhost{
+  background:rgba(250,253,255,.985)!important;
+  border:1px solid rgba(71,126,158,.36)!important;
+  box-shadow:0 18px 42px rgba(20,48,68,.22),0 4px 12px rgba(20,48,68,.08)!important;
+}
+#homePage .orderSource{
+  opacity:.32!important;
+  filter:saturate(.62) brightness(1.02)!important;
+}
+#homePage .orderPlaceholder td{
+  background:linear-gradient(90deg,rgba(226,240,248,.28),rgba(226,240,248,.65),rgba(226,240,248,.28))!important;
+  box-shadow:inset 0 2px 0 rgba(46,111,150,.72),inset 0 -1px 0 rgba(46,111,150,.08)!important;
+}
+#homePage .orderPlaceholder td:after{
+  color:rgba(46,92,121,.66)!important;
+  letter-spacing:.06em!important;
+}
+
+
+/* V14.7 compact consistency + instant-return polish */
+#homePage .stockCode{
+  font-size:1.08em!important;
+  font-weight:850!important;
+  letter-spacing:.035em!important;
+}
+#detailPage .tabs{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:7px!important;
+  align-items:center!important;
+}
+#detailPage .tabs a,
+#detailPage .tabs button,
+#detailPage .tab{
+  width:154px!important;
+  min-width:154px!important;
+  max-width:154px!important;
+  box-sizing:border-box!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  text-align:center!important;
+}
+
+
+/* V14 watchlist management */
+.watchRemove{
+  margin-left:8px;padding:1px 5px;border:0;border-radius:5px;background:transparent;
+  color:#8797a2;font-size:13px;font-weight:900;cursor:pointer;opacity:.22;vertical-align:1px
+}
+.watchRow:hover .watchRemove{opacity:.9}
+.watchRemove:hover{background:#edf3f6;color:#35576b}
+
+.detailWatchBtn{height:36px!important;border:1px solid #9eb6c5!important;border-radius:8px!important;padding:0 13px!important;background:#eef5f8!important;color:#244b63!important;font-weight:900!important;cursor:pointer!important;white-space:nowrap}
+.detailWatchBtn.registered{background:#f5f7f8!important;color:#70818d!important}
+
+.watchPager{display:flex;align-items:center;justify-content:center;gap:12px;padding:15px 4px;flex-wrap:wrap;font-weight:750}
+.watchPager button{padding:9px 16px;background:#fff;border:1px solid #bac9d8;border-radius:9px;cursor:pointer;font-weight:800}
+.watchPager button:disabled{opacity:.35;cursor:default}
+#detailPage #tabs{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;justify-content:flex-start!important;scrollbar-width:thin;gap:7px;padding-bottom:9px}
+#detailPage #tabs .tab{flex:0 0 auto!important;white-space:nowrap!important}
+
+.watchMovePage{margin:0 7px;padding:5px 6px;font-size:12px;border:1px solid #9eb5c9;border-radius:6px;background:#f6fbff;color:#153c5a;cursor:pointer}
+
+/* V14.49: phone portrait-only responsive layout. Desktop remains unchanged. */
+@media (max-width:600px) and (orientation:portrait){
+ html,body{width:100%;max-width:100%;overflow-x:hidden}
+ body{font-size:15px}
+ #homePage.homePage{width:100%;max-width:100%;padding:12px 12px 30px!important;overflow:hidden}
+ #homePage .appHeader{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ #homePage .appTitle{font-size:21px!important;line-height:1.3}
+ #homePage .appKicker{font-size:10px!important}
+ #homePage .headerRight{max-width:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+ #homePage .marketGrid{
+   display:flex!important;grid-template-columns:none!important;
+   overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
+   gap:10px!important;margin:0 -12px 18px!important;padding:0 12px 10px!important;
+   scrollbar-width:thin;-webkit-overflow-scrolling:touch
+ }
+ #homePage .marketCard{
+   flex:0 0 190px!important;width:190px!important;min-width:190px!important;
+   scroll-snap-align:start;box-sizing:border-box;padding:12px!important;
+   border-radius:12px!important;text-align:left!important;overflow:hidden
+ }
+ #homePage .marketName{font-size:14px!important}
+ #homePage .marketValue{font-size:23px!important;letter-spacing:0!important;white-space:nowrap!important}
+ #homePage .marketChange{font-size:13px!important;white-space:normal!important;overflow-wrap:anywhere}
+ #homePage .marketCard canvas.spark{width:100%!important;height:42px!important;max-width:100%;margin-top:8px}
+ #homePage .stockSearchBox{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+ #homePage #stockSearch{width:100%!important;min-width:0!important;font-size:15px!important;padding:12px!important}
+ #homePage .stockSearchBox button{min-width:64px!important;padding:12px 10px!important}
+ #homePage #searchMsg{grid-column:1/-1}
+ #homePage .homeHead{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px;margin:10px 0!important}
+ #homePage .homeTitle{font-size:25px!important;white-space:normal!important;line-height:1.2}
+ #homePage .homeSub{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px}
+ #homePage .homeSub button{max-width:100%;padding:7px 10px}
+ #homePage .watchTable{display:block!important;width:100%!important;max-width:100%;border-spacing:0!important;border-collapse:separate!important}
+ #homePage .watchTable thead{display:none!important}
+ #homePage .watchTable tbody{display:block!important;width:100%!important}
+ #homePage .watchRow{
+   display:grid!important;width:100%!important;min-width:0!important;
+   grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+   grid-template-areas:"identity identity" "price ratio" "change delta" "spark spark";
+   gap:0!important;margin:0 0 12px!important;padding:12px!important;
+   border:1px solid #cbd8e5!important;border-radius:13px!important;
+   background:#fff!important;box-shadow:0 3px 10px #18334d12;
+   transform:none!important;overflow:hidden
+ }
+ #homePage .watchRow td{
+   display:block!important;width:auto!important;min-width:0!important;max-width:100%;
+   margin:0!important;padding:6px 5px!important;
+   border:0!important;border-radius:0!important;background:transparent!important;
+   overflow-wrap:normal!important;word-break:normal!important;
+   box-shadow:none!important
+ }
+ #homePage .watchRow td:nth-child(1){grid-area:identity;display:flex!important;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:11px!important;border-bottom:1px solid #e4eaf0!important}
+ #homePage .watchRow td:nth-child(2){grid-area:price}
+ #homePage .watchRow td:nth-child(3){grid-area:change}
+ #homePage .watchRow td:nth-child(4){grid-area:spark;padding-top:5px!important}
+ #homePage .watchRow td:nth-child(5){grid-area:ratio}
+ #homePage .watchRow td:nth-child(6){grid-area:delta}
+ #homePage .watchRow .stockCode{font-size:14px!important;margin:0!important;flex:0 0 auto}
+ #homePage .watchRow .stockName{font-size:18px!important;margin:0!important;line-height:1.3;flex:1 1 130px;min-width:0;overflow-wrap:anywhere}
+ #homePage .watchRow .smoothHandle{display:none!important}
+ #homePage .watchRow .watchMovePage{order:3;flex:0 0 auto;max-width:100%;font-size:12px!important;padding:5px!important}
+ #homePage .watchRow .homeAbsPrice{font-size:24px!important;font-weight:950;white-space:nowrap}
+ #homePage .watchRow .homeAbsMove{font-size:14px!important;white-space:normal;line-height:1.4}
+ #homePage .watchRow .homeRatio{font-size:23px!important;font-weight:950;white-space:nowrap}
+ #homePage .watchRow .homeDelta{font-size:15px!important;font-weight:850;white-space:nowrap}
+ #homePage .watchRow td:nth-child(2)::before,#homePage .watchRow td:nth-child(5)::before{
+   display:block;color:#66798c;font-size:11px;font-weight:700;margin-bottom:3px
+ }
+ #homePage .watchRow td:nth-child(2)::before{content:"現在株価"}
+ #homePage .watchRow td:nth-child(5)::before{content:"制度信用倍率"}
+ #homePage .watchRow .rowSpark{width:100%!important;max-width:100%;height:55px!important;margin:0!important}
+ #homePage .watchPager{gap:8px!important;font-size:12px!important;line-height:1.4}
+ #homePage .watchPager button{padding:9px 11px!important}
+ #detailPage,#detailPage .w{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+ #detailPage .w{padding:12px 12px 30px!important}
+ #detailPage .hero{flex-wrap:wrap;gap:4px}
+ #detailPage .v{font-size:11px!important}
+ #detailPage .tabs{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:7px!important;padding:5px 0 10px!important}
+ #detailPage .tab{font-size:13px!important;padding:9px 11px!important}
+ #detailPage .bar{justify-content:flex-start!important;flex-wrap:wrap}
+ #detailPage .detailSearchWrap{display:flex;flex-wrap:wrap;gap:8px}
+ #detailPage #detailSearch{flex:1 1 190px;min-width:0;max-width:100%}
+ #detailPage .name{font-size:23px!important;overflow-wrap:anywhere}
+ #detailPage .earnBanner{padding:12px!important;gap:8px}
+ #detailPage .earnBanner strong{font-size:18px!important}
+ #detailPage .earnBanner>b{font-size:18px!important}
+ #detailPage .two{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px}
+ #detailPage .two>*,#detailPage .panel{min-width:0!important;width:100%}
+ #detailPage .panel,#detailPage .summary{padding:12px!important}
+ #detailPage canvas#cv{height:260px!important}
+ #detailPage canvas#priceCv{height:165px!important}
+ #detailPage .legend{gap:8px!important;font-size:10px!important}
+ #detailPage .sumRatio .num{font-size:36px!important}
+ #detailPage .bal .num{font-size:18px!important;white-space:normal!important;overflow-wrap:anywhere}
+ #detailPage .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #detailPage .metric{min-width:0;padding:10px!important}
+ #detailPage .metric b{font-size:18px!important;overflow-wrap:anywhere}
+ #detailPage .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #detailPage .tablePanel{padding:10px!important;max-width:100%;overflow:hidden}
+ #candlePopup{
+   position:fixed!important;top:50%!important;left:8px!important;right:8px!important;
+   transform:translateY(-50%)!important;width:calc(100vw - 16px)!important;
+   max-height:calc(100dvh - 24px)!important;overflow-y:auto!important;
+   padding:9px!important;border-radius:10px!important
+ }
+ #candlePopup #candleDrag{display:flex!important;align-items:center;gap:6px;flex-wrap:wrap}
+ #candlePopup #candleTitle{font-size:12px!important;flex:1 1 100px;min-width:0}
+ #candlePopup #candleRange,#candlePopup #candleClose{font-size:13px!important;min-height:34px}
+ #candlePopup canvas#candleCanvas{height:min(52dvh,330px)!important;min-height:195px;width:100%!important}
+ #candlePopup #candleHoverInfo{font-size:11px!important;overflow-wrap:anywhere}
+ #candlePopup #candleStatus{font-size:10px!important;overflow-wrap:anywhere}
+}
+
+/* V14.49: compact mobile-only watchlist. Desktop/detail unaffected. */
+@media (max-width:600px) and (orientation:portrait){
+ #homePage .watchRow{
+  grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;
+  grid-template-areas:"identity identity" "price ratio" "change delta"!important;
+  padding:7px 10px!important;margin-bottom:5px!important;
+  border-radius:8px!important;row-gap:0!important;
+  box-shadow:none!important
+ }
+ #homePage .watchRow td{padding:2px 4px!important;line-height:1.12!important}
+ #homePage .watchRow td:nth-child(1){padding:1px 4px 4px!important;margin-bottom:3px!important;gap:6px!important;border-bottom:1px solid #e7ebf1!important;flex-wrap:nowrap!important}
+ #homePage .watchRow td:nth-child(4){display:none!important}
+ #homePage .watchRow .stockCode{font-size:12px!important}
+ #homePage .watchRow .stockName{font-size:14px!important;line-height:1.25!important;flex:1 1 auto!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;overflow-wrap:normal!important}
+ #homePage .watchRow .watchMovePage{font-size:10px!important;padding:2px!important;max-width:57px!important;order:0!important}
+ #homePage .watchRow .homeAbsPrice{font-size:19px!important;line-height:1.15!important}
+ #homePage .watchRow .homeAbsMove{font-size:12px!important;line-height:1.2!important;white-space:nowrap!important}
+ #homePage .watchRow .homeRatio{font-size:19px!important;line-height:1.15!important}
+ #homePage .watchRow .homeDelta{font-size:12px!important;line-height:1.2!important}
+ #homePage .watchRow td:nth-child(2)::before,#homePage .watchRow td:nth-child(5)::before{font-size:9px!important;margin-bottom:1px!important}
+ #homePage .watchRow td:nth-child(2)::before{content:"株価"}
+ #homePage .watchRow td:nth-child(5)::before{content:"制度信用倍率"}
+ #homePage .homeHead{margin:6px 0!important}
+ #homePage .homeTitle{font-size:20px!important}
+}
+@media screen { #upd {display:none!important} .watchMovePage{display:none!important} }\n</style><style>
+#candlePopup{position:fixed;top:90px;right:26px;width:min(900px,calc(100vw - 24px));z-index:99999;background:transparent;color:#f3f7fc;border:1px solid #91b1d1;isolation:isolate;border-radius:12px;box-shadow:0 12px 42px #0006;padding:10px;box-sizing:border-box}
+#candlePopup .candleBackdrop{position:absolute;inset:0;background:rgba(18,35,55,var(--candle-bg-alpha,.90));border-radius:inherit;z-index:0;pointer-events:none}
+#candlePopup > :not(.candleBackdrop){position:relative;z-index:1}
+#candlePopup #candleTitle,#candlePopup #candleStatus{text-shadow:0 1px 3px #07121d,0 0 5px #07121d}
+#candlePopup canvas{cursor:crosshair;touch-action:pan-y;opacity:1!important;filter:none!important}
+#candlePopup[hidden]{display:none!important}
+#candleDrag{display:flex;align-items:center;gap:8px;cursor:move;user-select:none;touch-action:none}
+#candleDrag strong{flex:1;font-size:14px}
+#candlePopup select,#candlePopup button{font-size:12px;border:1px solid #9bb0c6;border-radius:5px;padding:5px;background:#e9f2ff;color:#10263d}
+#candlePopup canvas{cursor:crosshair;touch-action:pan-y;width:100%;height:440px;display:block;margin-top:8px}
+#candleStatus{font-size:11px;color:#d7e5f5;min-height:16px;margin-top:4px}
+@media(max-width:600px){#candlePopup{top:65px;left:12px!important;right:auto!important;width:calc(100vw - 24px)}#candlePopup canvas{cursor:crosshair;touch-action:pan-y;height:230px}}
+</style>
+<script>
+/* GitHub Pages snapshot adapter: read-only. No private LAN server needed. */
+(()=>{
+const nativeFetch=window.fetch.bind(window);
+const nativeAlert=window.alert.bind(window);
+window.fetch=(input,init)=>{
+ const u=typeof input==='string'?input:input.url;
+ const url=new URL(u,location.href);
+ if(!url.pathname.startsWith('/api/'))return nativeFetch(input,init);
+ const path=url.pathname.substring(5);
+ const method=(init&&init.method||'GET').toUpperCase();
+ if(method!=='GET'){
+  nativeAlert('クラウド試作版は閲覧専用です。銘柄の追加・削除や手動更新はPC版で行ってください。');
+  return Promise.resolve(new Response(JSON.stringify({ok:false,error:'クラウド版は閲覧専用です'}),{status:405,headers:{'Content-Type':'application/json'}}));
+ }
+ if(path==='backup-download')return nativeFetch('./api/data.json',{cache:'no-store'});
+ const code=url.searchParams.get('code');
+ const symbol=url.searchParams.get('symbol');
+ const range=url.searchParams.get('range');
+ let key=path;
+ if(code)key+='_'+encodeURIComponent(code);
+ if(symbol)key+='_'+encodeURIComponent(symbol);
+ if(range)key+='_'+encodeURIComponent(range);
+ return nativeFetch('./api/'+key+'.json',{cache:'no-store'}).then(r=>{
+   if(r.ok)return r;
+   return new Response(JSON.stringify({ok:false,error:'クラウド版で未取得のデータです'}),{status:200,headers:{'Content-Type':'application/json'}});
+ }).catch(()=>new Response(JSON.stringify({ok:false,error:'通信エラー'}),{status:200,headers:{'Content-Type':'application/json'}}));
+};
+})();
+</script>
+</head><body>
+<script>
+/* V14.7 fast-return cache */
+(function(){
+  const nativeFetch = window.fetch.bind(window);
+  const MEM = new Map();
+  const PREFIX = "seidoFastCacheV13_3:";
+  const TTL = 3 * 60 * 1000;
+
+  function keyOf(input, init){
+    const url = typeof input === "string" ? input : (input && input.url) || "";
+    const method = ((init && init.method) || (input && input.method) || "GET").toUpperCase();
+    if(method !== "GET") return null;
+    if(!/\/api\/(data|status)|query1\.finance\.yahoo\.com|query2\.finance\.yahoo\.com|\/v8\/finance\/chart\//.test(url)) return null;
+    return PREFIX + url;
+  }
+  function read(k){
+    if(!k) return null;
+    let x=MEM.get(k);
+    if(!x){
+      try{
+        const raw=sessionStorage.getItem(k);
+        if(raw) x=JSON.parse(raw);
+      }catch(e){}
+    }
+    if(!x || !x.body || Date.now()-x.t>TTL) return null;
+    MEM.set(k,x);
+    return x;
+  }
+  function write(k, body, headers, status){
+    if(!k || !body) return;
+    const x={t:Date.now(),body,headers:headers||{"content-type":"application/json"},status:status||200};
+    MEM.set(k,x);
+    try{sessionStorage.setItem(k,JSON.stringify(x));}catch(e){}
+  }
+  window.fetch = function(input, init){
+    const k=keyOf(input,init);
+    const cached=read(k);
+    if(cached){
+      // Paint instantly from the previous snapshot. Refresh silently in the background.
+      nativeFetch(input,init).then(async r=>{
+        if(k && r.ok){
+          try{
+            const body=await r.clone().text();
+            const ct=r.headers.get("content-type")||"application/json";
+            write(k,body,{"content-type":ct},r.status);
+            window.dispatchEvent(new CustomEvent("seido-cache-refreshed",{detail:{key:k}}));
+          }catch(e){}
+        }
+      }).catch(()=>{});
+      return Promise.resolve(new Response(cached.body,{status:cached.status,headers:cached.headers}));
+    }
+    return nativeFetch(input,init).then(async r=>{
+      if(k && r.ok){
+        try{
+          const body=await r.clone().text();
+          const ct=r.headers.get("content-type")||"application/json";
+          write(k,body,{"content-type":ct},r.status);
+        }catch(e){}
+      }
+      return r;
+    });
+  };
+
+  // Preserve the list position when opening a detail and restore it on Back/list return.
+  let homeY=0;
+  document.addEventListener("click",e=>{
+    const a=e.target.closest && e.target.closest("a");
+    if(a && a.getAttribute("href") && /\?code=\d+/.test(a.getAttribute("href"))){
+      homeY=window.scrollY;
+      try{sessionStorage.setItem("seidoHomeScrollV13_3",String(homeY));}catch(err){}
+    }
+  },true);
+  window.addEventListener("popstate",()=>{
+    setTimeout(()=>{
+      if(!location.search.includes("code=")){
+        let y=homeY;
+        try{y=Number(sessionStorage.getItem("seidoHomeScrollV13_3")||y||0)}catch(e){}
+        window.scrollTo(0,y);
+      }
+    },0);
+  });
+})();
+</script>
+
+<div id="homePage" class="homePage">
+  <div class="appHeader">
+    <div>
+      <div class="appTitle">制度信用ダッシュボード</div>
+      <div class="appKicker">Market &amp; Margin Overview</div>
+    </div>
+    <div class="headerRight">
+      <span id="headerUpdated">最終更新 —</span>
+      <button class="headerRefresh" onclick="refreshHome()">↻ 更新</button>
+    </div>
+  </div>
+  <div id="growthDiag" style="display:none;white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f7fb;border:1px solid #b9cbdc;border-radius:9px;padding:12px;margin:0 0 12px;font-size:13px;color:#10243d"></div>
+  <div style="margin-bottom:8px"><button id="growthDiagClose" type="button" onclick="toggleGrowthDiagnostics()" style="font-size:12px;padding:6px 12px">診断を開く</button></div>
+  <div class="marketGrid">
+    <div class="marketCard"><div class="marketName"><span class="pcName">日経225</span><span class="spName">日経225</span></div><div class="marketValue" id="m_nikkei">—</div><div class="marketChange" id="mc_nikkei">取得中</div><canvas class="spark" id="sp_nikkei" width="210" height="38"></canvas></div>
+    <div class="marketCard"><div class="marketName"><span class="pcName">TOPIX</span><span class="spName">TOPIX</span></div><div class="marketValue" id="m_topix">—</div><div class="marketChange" id="mc_topix">取得中</div><canvas class="spark" id="sp_topix" width="210" height="38"></canvas></div>
+    <div class="marketCard"><div class="marketName"><span class="pcName">グロース250</span><span class="spName">G250</span></div><div class="marketValue" id="m_growth">—</div><div class="marketChange" id="mc_growth">取得中</div><canvas class="spark" id="sp_growth" width="210" height="38"></canvas><button type="button" onclick="showGrowthDiagnostics()" style="margin-top:5px;font-size:11px;padding:4px 8px">取得診断</button></div>
+    <div class="marketCard"><div class="marketName"><span class="pcName">SOX半導体指数</span><span class="spName">SOX</span></div><div class="marketValue" id="m_sox">—</div><div class="marketChange" id="mc_sox">取得中</div><canvas class="spark" id="sp_sox" width="210" height="38"></canvas></div>
+    <div class="marketCard"><div class="marketName"><span class="pcName">NYSE FANG+指数</span><span class="spName">FANG+</span></div><div class="marketValue" id="m_fang">—</div><div class="marketChange" id="mc_fang">取得中</div><canvas class="spark" id="sp_fang" width="210" height="38"></canvas></div>
+  </div>
+  <div class="stockSearchBox">
+    <input id="stockSearch" type="text" inputmode="search" placeholder="銘柄コード・銘柄名で検索（例 7203 / トヨタ）" onkeydown="if(event.key==='Enter')searchStock()">
+    <button onclick="searchStock()">検索</button>
+    <div id="searchMsg"></div>
+  </div>
+  <div class="homeHead"><div class="homeTitle">登録銘柄一覧</div><div class="homeSub">制度信用倍率はJPXデータ　<button type="button" onclick="window.location.href='./api/data.json'" title="現在の登録銘柄と履歴をJSONファイルとして保存">登録データをバックアップ</button></div></div>
+  <table class="watchTable">
+    <thead><tr><th>コード・銘柄</th><th>株価</th><th>前日比</th><th>日中チャート</th><th>制度信用倍率</th><th>前回比</th></tr></thead>
+    <tbody id="watchBody"></tbody>
+  </table>
+  <div id="watchPager" class="watchPager"></div>
+</div>
+<div id="detailBack" class="detailBack"><button onclick="returnToHome()">← 一覧へ戻る</button></div>
+<div id="detailPage" style="display:none">
+<div class="w">
+<div class="hero"><div><div class="v">制度信用を主役にした日本株ダッシュボード　V14.49</div></div><b>JPX公式データ</b></div>
+<div class="tabs" id="tabs"></div><div class="bar"><button class="btn" id="upd">↻ 最新データ更新</button><span class="status" id="st">待機中</span></div>
+<div class="detailSearchWrap detailSearchInline">
+  <input id="detailSearch" type="text" placeholder="別の銘柄を検索（コード・銘柄名）" onkeydown="if(event.key==='Enter')searchDetailStock()">
+  <button onclick="searchDetailStock()">検索</button>
+  <span id="detailSearchMsg"></span>
+  <button id="detailWatchBtn" class="detailWatchBtn" onclick="toggleDetailWatch()" style="display:none">＋ 登録銘柄に追加</button>
+</div>
+<div class="name" id="nm"></div><div class="date" id="dt"></div>
+<div class="earnBanner"><div><span>次回決算発表</span><strong id="earnDate">—</strong><small id="earnSub"></small></div><b id="earnDays">—</b></div>
+<div class="two">
+ <div class="panel"><b>制度信用 推移（日次）</b><span class="dailyHint">直近13週・JPX公表分</span>
+<div class="legend"><span><i class="l1"></i>制度信用倍率</span><span><i class="l2"></i>制度買残（百万株）</span><span><i class="l3"></i>制度売残（百万株）</span></div>
+<canvas id="cv"></canvas>
+      <div class="priceChartBlock">
+        <div class="priceChartHead"><b>株価推移</b><span>同じ直近13週の終値を比較</span></div>
+        <canvas id="priceCv" width="900" height="170" title="クリックで日足ローソク足を表示" style="cursor:zoom-in"></canvas><div style="font-size:11px;color:#64748b;margin-top:3px">クリックで日足ローソク足を重ねて表示</div>
+      </div></div>
+ <div>
+  <div class="summary">
+   <div class="sumTop"><div class="sumRatio"><div class="lab">制度信用倍率</div><div class="num" id="ra"></div><div id="rc"></div></div></div>
+   <div class="balances"><div class="bal"><div class="lab">制度買残</div><div class="num" id="bu"></div><div id="bc"></div></div><div class="bal"><div class="lab">制度売残</div><div class="num" id="se"></div><div id="sc"></div></div></div>
+   <div class="agg"><div class="lab">参考・総合信用倍率</div><div class="num" id="ag"></div></div>
+  </div>
+  <div class="panel"><b>現在株価</b><div class="facts" id="facts"></div></div>
+ </div>
+</div>
+<div class="metrics" id="metricMirror"></div>
+<div class="tablePanel"><b>制度信用データ</b>
+<div style="overflow:auto"><table><thead><tr><th>日付</th><th>倍率</th><th>売残</th><th>買残</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+</div>
+<script>
+const M={"9984":{n:"ソフトバンクグループ",a:"—",per:"—",pbr:"—",y:"—",t:"—",e:"2026/11/10"},"5803":{n:"フジクラ",a:"—",per:"—",pbr:"—",y:"—",t:"—",e:"2026/11/10（予定）"},"7974":{n:"任天堂",a:"—",per:"—",pbr:"—",y:"—",t:"—",e:"2026/11/5"},"5801":{n:"古河電工",a:"—",per:"—",pbr:"—",y:"—",t:"—",e:"2026/11/9 14:00"}};
+const EARN_EST={
+"9984":{month:2,label:"2月頃"},"5803":{month:2,label:"2月頃"},
+"7974":{month:2,label:"2月頃"},"5801":{month:2,label:"2月頃"}
+};
+
+const LIVE_META={};
+function stockMeta(code=C){
+  code=String(code);
+  const st=D?.stocks?.[code]||{};
+  const base=M[code]||{};
+  const live=LIVE_META[code]||{};
+  return {
+    n:live.n||st.name||base.n||code,
+    a:live.a||base.a||"—",
+    per:live.per||base.per||"—",
+    pbr:live.pbr||"—",
+    y:live.y||base.y||"—",
+    t:live.t||base.t||"—",
+    e:live.e||base.e||"—",
+    rights_final:live.rights_final||"—",
+    ex_date:live.ex_date||"—"
+  };
+}
+
+let D={},C=localStorage.v9code||"9984";const $=x=>document.getElementById(x),fmt=x=>Number(x).toLocaleString("ja-JP");async function J(u,o){let r=await fetch(u+"?t="+Date.now(),Object.assign({cache:"no-store"},o||{}));if(!r.ok)throw Error("HTTP "+r.status);return r.json()}function pc(a,b){return b?(a/b-1)*100:null}function cc(id,v){let e=$(id);if(v==null){e.textContent="";return}e.innerHTML='<span class="arrow">'+(v>=0?"↑":"↓")+'</span><span>'+Math.abs(v).toFixed(1)+'%</span>';e.className="chg "+(v>=0?"up":"down")}function H(){return (D.stocks?.[C]?.history||[]).slice().sort((a,b)=>a.date.localeCompare(b.date))}
+function R(){let m=stockMeta(C),h=H(),x=h.at(-1)||{},p=h.at(-2);$("nm").textContent=C+" "+m.n;$("dt").textContent="最新信用データ "+(x.date||"—");$("ra").textContent=x.ratio==null?"—":(+x.ratio).toFixed(2)+"倍";$("se").textContent=x.sell==null?"—":(x.sell/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})+"万株";$("bu").textContent=x.buy==null?"—":(x.buy/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})+"万株";$("ag").textContent=m.a;cc("rc",p?pc(x.ratio,p.ratio):null);cc("sc",p?pc(x.sell,p.sell):null);cc("bc",p?pc(x.buy,p.buy):null);$("facts").innerHTML=[["PER",m.per],["PBR",m.pbr],["配当利回り",m.y],["目標株価",m.t],["次回決算",m.e]].map(z=>`<div class=fact><span class=lab>${z[0]}</span><b>${z[1]}</b></div>`).join("");$("tb").innerHTML=h.slice(-20).reverse().map(r=>`<tr><td>${r.date}</td><td>${(+r.ratio).toFixed(2)}倍</td><td>${(r.sell/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})}万株</td><td>${(r.buy/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})}万株</td></tr>`).join("");document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.c==C));chart(h.slice(-65))}
+function chart(h){
+ const c=$("cv"),w=c.clientWidth,hh=355,d=devicePixelRatio||1;c.width=w*d;c.height=hh*d;
+ const g=c.getContext("2d");g.scale(d,d);g.clearRect(0,0,w,hh);if(!h.length)return;
+ const ss=[
+  {v:h.map(x=>+x.ratio),c:"#1769aa",dash:[]},
+  {v:h.map(x=>(+x.buy)/1000000),c:"#2f7d63",dash:[8,5]},
+  {v:h.map(x=>(+x.sell)/1000000),c:"#a66b24",dash:[3,5]}
+ ];
+ const all=ss.flatMap(s=>s.v),mx=Math.max(...all)*1.08,p=36;
+ g.font="11px system-ui";g.fillStyle="#5f6b7c";g.textAlign="right";
+ for(let i=0;i<5;i++){const y=p+(hh-2*p)*i/4,val=mx*(1-i/4);g.strokeStyle="#cfd6df";g.lineWidth=1;g.setLineDash([]);g.beginPath();g.moveTo(p,y);g.lineTo(w-p,y);g.stroke();g.fillText(val.toFixed(1),p-7,y+4)}
+ ss.forEach(s=>{g.strokeStyle=s.c;g.lineWidth=(s===ss[0]?4.5:3.5);g.setLineDash(s.dash);g.beginPath();s.v.forEach((v,i)=>{const x=p+(w-2*p)*(h.length==1?0:i/(h.length-1)),y=p+(mx-v)/mx*(hh-2*p);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()});g.setLineDash([]);
+ g.fillStyle="#5f6b7c";g.textAlign="center";const step=Math.max(1,Math.ceil(h.length/6));h.forEach((r,i)=>{if(i%step==0||i==h.length-1){const x=p+(w-2*p)*(h.length==1?0:i/(h.length-1));g.fillText(r.date.slice(5).replace("-","/"),x,hh-8)}})
+}
+async function load(){D=await J("/api/data");R();renderHome();restoreRoute()}$("tabs").innerHTML=Object.keys(M).map(c=>`<button class=tab data-c=${c}>${c} ${M[c].n}</button>`).join("");$("tabs").onclick=e=>{let b=e.target.closest(".tab");if(b){C=b.dataset.c;localStorage.v9code=C;R()}};$("upd").onclick=async()=>{
+  let b=$("upd");
+  const keepDetail=document.getElementById("detailPage")?.style.display!=="none";
+  const keepCode=String(C||detailCandidate?.code||"");
+  const keepCandidate=detailCandidate?{...detailCandidate}:null;
+  b.disabled=true;$("st").textContent="更新開始...";
+  try{
+    await J("/api/update",{method:"POST"});
+    for(let i=0;i<60;i++){
+      let s=await J("/api/status");
+      $("st").textContent=s.running?"更新中 "+s.step:s.ok?"✓ 取込成功 / "+s.date:"✗ "+(s.error||"失敗");
+      if(!s.running){
+        if(s.ok){
+          D=await J("/api/data");
+          renderHome();renderTabsInSavedOrder();
+          if(keepDetail&&keepCode){
+            if(D?.stocks?.[keepCode]){
+              detailCandidate={code:keepCode,name:D.stocks[keepCode].name||keepCandidate?.name||keepCode};
+              openDetail(keepCode,false);
+              loadCandidateInfo(keepCode);
+              loadHomePrices();
+            }else if(keepCandidate){
+              openDetailCandidate(keepCandidate,false);
+              loadCandidateMargin(keepCode);
+              drawCandidatePriceHistory(keepCode);
+              loadCandidateInfo(keepCode);
+              loadCandidateMarginHistory(keepCode);
+            }
+          }else{
+            showHome();
+          }
+        }
+        break;
+      }
+      await new Promise(r=>setTimeout(r,1000));
+    }
+  }catch(e){$("st").textContent="✗ "+e.message}
+  b.disabled=false;
+};load();addEventListener("resize",R);
+</script>
+<script>
+// Move the four valuation facts into a clean horizontal strip, while keeping next earnings on the right card.
+const oldR=R; R=function(){oldR(); let m=stockMeta(C); document.getElementById("metricMirror").innerHTML=[
+["PER（予想）",m.per],["PBR（実績）",m.pbr],["予想配当利回り",m.y],["アナリスト目標株価",m.t]
+].map(z=>`<div class="metric"><span class="lab">${z[0]}</span><b>${z[1]}</b></div>`).join("");
+document.getElementById("facts").innerHTML=`<div class="fact priceFact" style="grid-column:1/-1"><span class="lab">現在株価</span><div class="priceLine"><b id="priceNow">—</b><span id="priceChg" class="pchg"></span></div><span class="priceNote">前日終値比</span><div id="dividendDates"><div class="divDate"><span class="dlabel">権利付き最終日</span><span class="dvalue">${m.rights_final||"—"}</span></div><div class="divDate"><span class="dlabel">権利落ち日</span><span class="dvalue">${m.ex_date||"—"}</span></div></div></div>`;
+let raw=m.e.replace(/（.*?）/g,"").replace(/\s+\d{1,2}:\d{2}.*/,"");
+let parts=raw.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+if(parts){
+ let ed=new Date(+parts[1],+parts[2]-1,+parts[3]),now=new Date();now.setHours(0,0,0,0);
+ let days=Math.ceil((ed-now)/86400000);
+ let wd=["日","月","火","水","木","金","土"][ed.getDay()];
+ document.getElementById("earnDate").textContent=`${parts[1]}年${+parts[2]}月${+parts[3]}日（${wd}）`;
+ document.getElementById("earnDays").textContent=days>=0?`あと${days}日`:"発表済み";
+ document.getElementById("earnSub").textContent=m.e.includes("予定")?"予定":"";
+}
+}
+load();
+</script>
+<script>
+function updateEarningsV96(){
+ const m=stockMeta(C), banner=document.querySelector(".earnBanner");
+ if(!banner)return;
+ const raw=(m.e||"").replace(/（.*?）/g,"").replace(/\s+\d{1,2}:\d{2}.*/,"");
+ const parts=raw.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+ const today=new Date(); today.setHours(0,0,0,0);
+ if(parts){
+   const ed=new Date(+parts[1],+parts[2]-1,+parts[3]);
+   const days=Math.ceil((ed-today)/86400000);
+   if(days>=0){
+     const wd=["日","月","火","水","木","金","土"][ed.getDay()];
+     banner.classList.remove("estimated");
+     document.getElementById("earnDate").textContent=`${parts[1]}年${+parts[2]}月${+parts[3]}日（${wd}）`;
+     document.getElementById("earnDays").textContent=days===0?"本日":`あと${days}日`;
+     document.getElementById("earnSub").textContent=m.e.includes("予定")?"予定":"";
+     return;
+   }
+ }
+ const est=EARN_EST[C]||{month:2,label:"2月頃"};
+ const y=today.getFullYear()+(today.getMonth()+1>est.month?1:0);
+ banner.classList.add("estimated");
+ document.getElementById("earnDate").textContent=`${y}年${est.label}`;
+ document.getElementById("earnDays").textContent="日程未発表";
+ document.getElementById("earnSub").textContent="過去の発表時期をもとにした目安";
+}
+const R_v95=R;
+R=function(){R_v95();updateEarningsV96();}
+
+async function loadPriceV97(){
+ const pv=document.getElementById("priceNow"), pc=document.getElementById("priceChg");
+ if(!pv||!pc)return;
+ pv.textContent="—"; pc.textContent=""; pc.className="pchg";
+ try{
+   const r=await fetch(`/api/price?code=${encodeURIComponent(C)}&t=${Date.now()}`,{cache:"no-store"});
+   const j=await r.json();
+   if(!j.ok||j.price==null) throw new Error(j.error||"price unavailable");
+   pv.textContent=Math.round(j.price).toLocaleString("ja-JP")+"円";
+   if(j.pct!=null){
+      const up=j.pct>=0, arrow=up?"↑":"↓", sign=up?"+":"";
+      pc.className="pchg "+(up?"up":"down");
+      pc.textContent=`${arrow} ${sign}${Math.round(j.change).toLocaleString("ja-JP")}円（${sign}${j.pct.toFixed(2)}%）`;
+   }
+ }catch(e){
+   pv.textContent="—"; pc.textContent="";
+ }
+}
+const R_v96_price=R;
+R=function(){R_v96_price();loadPriceV97();}
+
+
+// V11 HOME
+function homeFmtMan(n){return (n/10000).toLocaleString('ja-JP',{maximumFractionDigits:1})}
+function pctChange(cur,prev){return prev ? (cur/prev-1)*100 : 0}
+let homeRendered=false;
+let homeScrollY=(()=>{try{return Number(sessionStorage.getItem('seidoHomeScrollV13_5')||0)}catch(e){return 0}})();
+
+function refreshHomeInBackground(){
+  // Never blank/rebuild the watch list on return. Update the existing DOM/canvases in place.
+  Promise.resolve().then(()=>loadHomePrices()).catch(()=>{});
+  Promise.resolve().then(()=>loadMarkets()).catch(()=>{});
+  Promise.resolve().then(()=>loadIntradayCharts()).catch(()=>{});
+}
+
+function returnToHome(){
+  detailCandidate=null;
+  const url=watchPage===0?location.pathname:location.pathname+"?page="+(watchPage+1);
+  try{history.pushState({view:"home",page:watchPage},"",url)}catch(e){}
+  showHome(false);
+}
+function showHome(push=true){
+  if(push) history.pushState({view:"home"},"",location.pathname);
+  document.getElementById('homePage').style.display='';
+  document.getElementById('detailPage').style.display='none';
+  document.getElementById('detailBack').style.display='none';
+
+  // First visit builds the page. Back navigation reuses the already-painted DOM and canvases.
+  if(!homeRendered){
+    renderHome();
+    homeRendered=true;
+  }
+  requestAnimationFrame(()=>window.scrollTo(0,homeScrollY||0));
+  refreshHomeInBackground();
+}
+
+
+
+
+async function loadCandidateInfo(code){
+  try{
+    const j=await (await fetch("/api/stock-info?code="+encodeURIComponent(code),{cache:"no-store"})).json();
+    if(!j.ok||String(C)!==String(code))return;
+    // Show exact API provenance in console for reproducible debugging.
+    console.info('[V14.49 stock-info]',code,'PBR=',j.pbr,'source=',j.pbr_source,'PER=',j.per,'note=',j.per_note);
+    LIVE_META[String(code)]={
+      n:(j.name&&j.name!==code)?j.name:(LIVE_META[String(code)]?.n||""),
+      a:j.aggregate||LIVE_META[String(code)]?.a||"",
+      per:j.per||LIVE_META[String(code)]?.per||"",
+      pbr:(j.pbr&&j.pbr!=="—"?j.pbr:"—"),
+      y:j.yield||LIVE_META[String(code)]?.y||"",
+      t:j.target||LIVE_META[String(code)]?.t||"",
+      e:j.earnings||LIVE_META[String(code)]?.e||"",
+      rights_final:j.rights_final||LIVE_META[String(code)]?.rights_final||"",
+      ex_date:j.ex_date||LIVE_META[String(code)]?.ex_date||""
+    };
+    if(j.name&&j.name!==code){if(detailCandidate&&String(detailCandidate.code)===String(code))detailCandidate.name=j.name;const nm=$("nm");if(nm)nm.textContent=code+" "+j.name}
+    // Shared bottom metric strip. Never overwrite the right-side price card.
+    const metrics=$("metricMirror");
+    if(metrics)metrics.innerHTML=[["PER（予想）",j.per||"—"],["PBR（実績）",j.pbr||"—"],["予想配当利回り",j.yield||"—"],["アナリスト目標株価",j.target||"—"]].map(z=>`<div class="metric"><span class="lab">${z[0]}</span><b>${z[1]}</b>${z[0]==="アナリスト目標株価"?`<small style="display:block;font-size:11px;color:#53657a;overflow-wrap:anywhere">${j.target_source?`平均・${j.target_source}`:(j.target_error?`取得不可：${j.target_error}`:"取得元から数値を確認できません")}</small>`:""}</div>`).join("");
+    const ag=$("ag"); if(ag)ag.textContent=j.aggregate||"—";
+    const dd=document.querySelectorAll("#dividendDates .dvalue");
+    if(dd[0])dd[0].textContent=j.rights_final||"—";
+    if(dd[1])dd[1].textContent=j.ex_date||"—";
+    const ed=$("earnDate"),days=$("earnDays"),sub=$("earnSub");
+    const m=String(j.earnings||"").match(/(20\d{2})\/(\d{1,2})\/(\d{1,2})(?:\s+(\d{1,2}:\d{2}))?/);
+    if(m){
+      const d=new Date(+m[1],+m[2]-1,+m[3]),wd=["日","月","火","水","木","金","土"][d.getDay()];
+      ed.textContent=`${m[1]}年${+m[2]}月${+m[3]}日（${wd}）${m[4]?" "+m[4]:""}`;
+      const n=new Date(),today=new Date(n.getFullYear(),n.getMonth(),n.getDate()),dd=Math.ceil((d-today)/86400000);
+      days.textContent=dd===0?"本日":dd>0?`あと${dd}日`:"発表済み";if(sub)sub.textContent="";
+    }else{if(ed)ed.textContent="日程未取得";if(days)days.textContent="—";if(sub)sub.textContent=""}
+  }catch(e){const m=$("metricMirror");if(m)m.title='指標取得通信エラー: '+e.message;}
+}
+async function loadCandidateMarginHistory(code){
+  try{
+    const j=await (await fetch("/api/preview-history?code="+encodeURIComponent(code),{cache:"no-store"})).json();
+    if(!j.ok||!Array.isArray(j.history)||!j.history.length)return;
+    const rows=j.history;chart(rows.slice(-65));
+    const x=rows.at(-1),p=rows.at(-2),set=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+    set("ra",Number(x.ratio).toFixed(2)+"倍");
+    set("bu",(Number(x.buy)/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})+"万株");
+    set("se",(Number(x.sell)/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})+"万株");
+    if(p){cc("rc",pc(x.ratio,p.ratio));cc("bc",pc(x.buy,p.buy));cc("sc",pc(x.sell,p.sell))}
+    const tb=$("tb");if(tb)tb.innerHTML=rows.slice(-20).reverse().map(r=>`<tr><td>${r.date}</td><td><b>${Number(r.ratio).toFixed(2)}倍</b></td><td>${(Number(r.sell)/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})}万株</td><td>${(Number(r.buy)/10000).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})}万株</td></tr>`).join("");
+  }catch(e){}
+}
+
+async function loadCandidateMargin(code){
+  try{
+    const j=await (await fetch("/api/preview-margin?code="+encodeURIComponent(code),{cache:"no-store"})).json();
+    if(!j.ok)return;
+    const ratio=Number(j.ratio),buy=Number(j.buy),sell=Number(j.sell);
+    const set=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val};
+    set("ra",Number.isFinite(ratio)?ratio.toFixed(2)+"倍":"—");
+    set("bu",Number.isFinite(buy)?(buy/10000).toFixed(1)+"万株":"—");
+    set("se",Number.isFinite(sell)?(sell/10000).toFixed(1)+"万株":"—");
+    set("dt",j.date?("JPX 制度信用 "+j.date+" / 未登録銘柄"):"未登録銘柄");
+    set("rc","—");set("bc","—");set("sc","—");
+    const tb=document.getElementById("tb");
+    if(tb)tb.innerHTML=`<tr><td>${j.date||"—"}</td><td><b>${Number.isFinite(ratio)?ratio.toFixed(2):"—"}</b></td><td>${Number.isFinite(sell)?(sell/10000).toFixed(1):"—"}万株</td><td>${Number.isFinite(buy)?(buy/10000).toFixed(1):"—"}万株</td></tr>`;
+  }catch(e){}
+}
+
+async function drawCandidatePriceHistory(code){
+  try{
+    const j=await (await fetch("/api/weekly?code="+encodeURIComponent(code),{cache:"no-store"})).json();
+    const pts=(j.history||[]).slice(-65);
+    if(!j.ok||!pts.length)return;
+    const canvas=document.getElementById("priceCv");if(!canvas)return;
+    const ctx=canvas.getContext("2d"),dpr=window.devicePixelRatio||1,W=canvas.clientWidth||700,H=canvas.clientHeight||210;
+    canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    const getv=p=>Number(p.close??p.price??p.v??p[1]);
+    const vals=pts.map(getv).filter(Number.isFinite);if(!vals.length)return;
+    const lo=Math.min(...vals),hi=Math.max(...vals),pad=Math.max((hi-lo)*.12,1),min=lo-pad,max=hi+pad,L=46,R=12,T=14,B=26,pw=W-L-R,ph=H-T-B;
+    ctx.strokeStyle="#d9e3e8";ctx.lineWidth=1;
+    for(let i=0;i<4;i++){const y=T+ph*i/3;ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(W-R,y);ctx.stroke()}
+    ctx.fillStyle="#708399";ctx.font="11px sans-serif";ctx.textAlign="right";
+    for(let i=0;i<4;i++){const y=T+ph*i/3,v=max-(max-min)*i/3;ctx.fillText(Math.round(v).toLocaleString(),L-6,y+4)}
+    ctx.strokeStyle="#2c78a0";ctx.lineWidth=2.5;ctx.beginPath();
+    pts.forEach((p,i)=>{const v=getv(p);if(!Number.isFinite(v))return;const x=L+(pts.length===1?0:pw*i/(pts.length-1)),y=T+ph*(max-v)/(max-min);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+  }catch(e){}
+}
+
+function isRegistered(code){return !!(D?.stocks?.[String(code)]);}
+function syncDetailWatchButton(){
+  const b=document.getElementById("detailWatchBtn");if(!b)return;
+  const code=String(detailCandidate?.code||C||"");
+  if(!code){b.style.display="none";return}
+  b.style.display="";
+  const yes=isRegistered(code);
+  b.classList.toggle("registered",yes);
+  b.textContent=yes?"✓ 登録済み（クリックで解除）":"＋ 登録銘柄に追加";
+  b.title=yes?"登録銘柄から外す":"登録銘柄に追加";
+}
+async function openDetailCandidate(item,push=true){
+  const code=String(item.code);detailCandidate={code,name:item.name||code};
+  if(isRegistered(code)){openDetail(code,push);syncDetailWatchButton();return}
+  if(push)history.pushState({view:"detail",code},"",location.pathname+"?code="+encodeURIComponent(code));
+  const home=document.getElementById("homePage");if(home&&home.style.display!=="none")homeScrollY=window.scrollY;
+  home.style.display="none";document.getElementById("detailPage").style.display="";
+  document.getElementById("detailBack").style.display="block";
+  C=code;
+  document.getElementById("detailBack").style.display="block";
+  // Draw the same detail skeleton used by registered stocks, then clear only unavailable credit data.
+  R();
+  const nm=document.getElementById("nm");if(nm)nm.textContent=code+" "+detailCandidate.name;
+  const dt=document.getElementById("dt");if(dt)dt.textContent="未登録銘柄 / JPX制度信用を取得中";
+  ["ratio","buy","sell","ratioChg","buyChg","sellChg","per","pbr","yield","target","earnDate","earnDays","ra","se","bu","rc","sc","bc","ag","priceNow","priceChg"].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent="—"});
+  const cv=document.getElementById("cv");if(cv){const cx=cv.getContext("2d");cx.clearRect(0,0,cv.width,cv.height);}
+  const pcv=document.getElementById("priceCv");if(pcv){const px=pcv.getContext("2d");px.clearRect(0,0,pcv.width,pcv.height);}
+  const tb=document.getElementById("tb");if(tb)tb.innerHTML="";
+  const mirror=$("metricMirror");if(mirror)mirror.querySelectorAll("b").forEach(e=>e.textContent="—");
+  syncDetailWatchButton();
+  window.scrollTo(0,0);
+  // Fetch independently: slow quotes must not block JPX, earnings or fundamentals.
+  (async()=>{  try{
+    const q=await (await fetch("/api/price?code="+code,{cache:"no-store"})).json();
+    const pe=document.getElementById("priceNow");if(pe&&q.ok&&q.price!=null)pe.textContent=Number(q.price).toLocaleString("ja-JP")+"円";
+    const ce=document.getElementById("priceChg");
+    if(ce&&q.ok&&q.pct!=null){
+      const up=Number(q.pct)>=0,sg=up?"+":"";
+      ce.textContent=`${up?"▲":"▼"} ${q.change==null?"":sg+Math.round(q.change).toLocaleString("ja-JP")+"円 "}(${sg}${Number(q.pct).toFixed(2)}%)`;
+      ce.className="pchg "+(up?"up":"down");
+    }
+  }catch(e){}
+  })();
+  drawCandidatePriceHistory(code);
+  loadCandidateMargin(code);
+  loadCandidateInfo(code);
+  loadCandidateMarginHistory(code);
+}
+async function toggleDetailWatch(){
+  const item=detailCandidate||{code:C,name:(document.getElementById("nm")?.textContent||"").replace(String(C),"").trim()};
+  if(!item?.code)return;
+  if(isRegistered(item.code)){
+    if(!confirm(String(item.code)+" を登録銘柄から外しますか？"))return;
+    try{
+      const r=await fetch("/api/watch/remove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:String(item.code)})});
+      const j=await r.json();if(!j.ok)throw Error(j.error||"解除できませんでした");
+      D=await J("/api/data");
+      try{
+        const key="seidoWatchOrderV13";
+        const a=JSON.parse(localStorage.getItem(key)||"[]").filter(x=>String(x)!==String(item.code));
+        localStorage.setItem(key,JSON.stringify(a));
+      }catch(e){}
+      renderHome();renderTabsInSavedOrder();
+      detailCandidate=item;
+      openDetailCandidate(item,false);
+      syncDetailWatchButton();
+    }catch(e){alert("登録解除エラー: "+e.message)}
+    return;
+  }
+  const b=document.getElementById("detailWatchBtn");if(b){b.disabled=true;b.textContent="追加中…"}
+  try{
+    const r=await fetch("/api/watch/add",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(item)});
+    const j=await r.json();if(!j.ok)throw Error(j.error||"追加できませんでした");
+    D=await J("/api/data");
+    C=String(item.code);
+    renderHome();renderTabsInSavedOrder();
+    detailCandidate={code:C,name:D?.stocks?.[C]?.name||item.name||C};
+    openDetail(C,false);
+    loadHomePrices();
+    requestAnimationFrame(()=>{try{R();draw();drawPrice();}catch(e){}});
+    syncDetailWatchButton();
+    const dm=document.getElementById("detailSearchMsg");
+    if(dm){dm.textContent="登録しました";setTimeout(()=>{if(dm.textContent==="登録しました")dm.textContent=""},2200);}
+  }catch(e){alert("追加エラー: "+e.message)}
+  finally{if(b)b.disabled=false}
+}
+
+function openDetail(code,push=true){
+  const home=document.getElementById('homePage');
+  if(home && home.style.display!=='none') homeScrollY=window.scrollY;
+  try{ sessionStorage.setItem('seidoHomeScrollV13_5',String(homeScrollY)); }catch(e){}
+  try{ localStorage.setItem('stock',code); }catch(e){}
+  C=code; localStorage.v9code=code;
+  detailCandidate={code:String(code),name:D?.stocks?.[code]?.name||String(code)};
+  if(push) history.pushState({view:"detail",code},"",location.pathname+"?code="+encodeURIComponent(code));
+  document.getElementById('homePage').style.display='none';
+  document.getElementById('detailPage').style.display='';
+  document.getElementById('detailBack').style.display='block';
+  renderTabsInSavedOrder();
+  if(typeof R==='function') R();
+  loadCandidateInfo(code);
+  loadPriceV97();
+  loadWeeklyPrice(code);
+  window.scrollTo(0,0);
+}
+function setMove(el,pct,change){
+  if(!el)return;
+  if(pct==null){el.textContent="—";el.className="marketChange";return}
+  const up=pct>=0, sign=up?"+":"";
+  const ch=(change==null)?"":`${sign}${Number(change).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2})} `;
+  el.textContent=`${up?"▲":"▼"} ${ch}(${sign}${pct.toFixed(2)}%)`;
+  el.className="marketChange "+(up?"up":"down");
+}
+async function refreshHome(){
+  const b=document.querySelector(".headerRefresh");
+  if(b){b.disabled=true;b.textContent="更新中…"}
+  try{
+    await loadMarkets();
+    await loadHomePrices();
+    const d=new Date();
+    const e=document.getElementById("headerUpdated");
+    if(e)e.textContent=`最終更新 ${d.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"})} ${d.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})}`;
+  }finally{
+    if(b){b.disabled=false;b.textContent="↻ 更新"}
+  }
+}
+
+function toggleGrowthDiagnostics(){
+ const el=document.getElementById('growthDiag'), b=document.getElementById('growthDiagClose');
+ if(!el||!b)return;
+ const opening=el.style.display==='none';
+ el.style.display=opening?'block':'none';
+ b.textContent=opening?'診断を閉じる':'診断を開く';
+}
+async function showGrowthDiagnostics(){
+ const el=document.getElementById('growthDiag');if(!el)return;
+ el.style.display='block';document.getElementById('growthDiagClose').textContent='診断を閉じる';el.textContent='グロース250の取得先を確認中...（最大1分ほど）';
+ try{
+  const r=await fetch('/api/growth-diagnostics?t='+Date.now(),{cache:'no-store'});
+  const j=await r.json();
+  const lines=['グロース250 取得診断','確認日時: '+(j.checked_at||'不明'),j.ok?'取得成功: '+j.quote.price+' / '+j.quote.source:'すべての取得先で失敗'];
+  for(const x of j.providers||[])lines.push((x.ok?'OK':'NG')+' '+x.name+': '+(x.ok?x.price:x.error));
+  lines.push('--- グラフ（日足）取得診断 ---');
+  try{
+    const hr=await fetch('/api/growth-history?t='+Date.now(),{cache:'no-store'});
+    const gh=await hr.json();
+    lines.push('HTTP: '+hr.status);
+    if(gh.ok){
+      lines.push('OK 日足データ: '+(gh.points?.length||0)+'件 / '+(gh.source||'不明'));
+      lines.push('期間: '+(gh.dates?.[0]||'不明')+' ～ '+(gh.dates?.[gh.dates.length-1]||'不明'));
+      if(gh.points?.length>=2){drawMarketChart('sp_growth',gh.points,gh.prev);lines.push('グラフ描画を再実行しました');}
+      else lines.push('NG グラフに必要な2件以上のデータがありません');
+    }else lines.push('NG 日足データ: '+(gh.error||'原因不明')+' / '+(gh.source||'不明'));
+  }catch(err){lines.push('NG 日足データ通信: '+err.message);}
+
+  el.textContent=lines.join('\n');
+
+  if(j.ok)loadMarkets();
+ }catch(e){el.textContent='診断の通信エラー: '+e.message;}
+}
+
+async function loadMarkets(){
+  try{
+    const j=await J("/api/markets");
+    for(const key of ["nikkei","topix","growth","sox","fang"]){
+      const x=j.items?.[key], v=document.getElementById("m_"+key), c=document.getElementById("mc_"+key);
+      if(x?.ok && x.price!=null){
+        v.textContent=Number(x.price).toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2});
+        setMove(c,x.pct,x.change);
+        
+      }else{ v.textContent="—"; c.textContent="取得不可"; c.title=x?.error||"取得元が応答していません"; c.className="marketChange"; }
+    }
+  }catch(e){}
+  const d=new Date(), e=document.getElementById("headerUpdated");
+  if(e)e.textContent=`最終更新 ${d.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"})} ${d.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})}`;
+}
+// Bounded concurrency prevents a 100-stock list from flooding Yahoo/API.
+const WATCH_FETCH_CONCURRENCY=5;
+let watchRenderGeneration=0;
+const watchPriceCache=new Map();
+const watchSparkCache=new Map();
+async function parallelWatch(codes,worker,limit=WATCH_FETCH_CONCURRENCY){
+  let cursor=0;
+  await Promise.all(Array.from({length:Math.min(limit,codes.length)},async()=>{
+    while(cursor<codes.length){
+      const code=codes[cursor++];
+      try{await worker(code)}catch(e){console.debug("Watch data:",code,e)}
+    }
+  }));
+}
+async function loadHomePrices(generation=watchRenderGeneration){
+  const codes=visibleWatchCodes();
+  await parallelWatch(codes,async code=>{
+    const pv=document.getElementById("hp_"+code),pc=document.getElementById("hc_"+code);
+    if(!pv||!pc)return;
+    try{
+      let j=watchPriceCache.get(code);
+      if(!j||Date.now()-j.at>60000){
+        const r=await fetch(`/api/price?code=${encodeURIComponent(code)}`,{cache:"no-store"});
+        const value=await r.json();
+        if(!r.ok||!value.ok||value.price==null)throw Error(value.error||"price unavailable");
+        j={value,at:Date.now()};watchPriceCache.set(code,j);
+      }
+      if(generation!==watchRenderGeneration)return;
+      const value=j.value;
+      pv.textContent=Math.round(value.price).toLocaleString("ja-JP")+"円";
+      if(value.pct!=null){
+        const up=value.pct>=0,sign=up?"+":"";
+        pc.className="homePriceChg "+(up?"up":"down");
+        const yen=value.change==null?"":`${sign}${Math.round(value.change).toLocaleString("ja-JP")}円 `;
+        pc.textContent=`${up?"▲":"▼"} ${yen}(${sign}${value.pct.toFixed(2)}%)`;
+      }else pc.textContent="—";
+    }catch(e){
+      if(generation!==watchRenderGeneration)return;
+      pv.textContent="—";pc.textContent="取得不可";pc.className="homePriceChg";
+    }
+  });
+}
+
+// V13 smooth watch-list ordering
+const ORDER_KEY="seidoWatchOrderV13";
+const WATCH_PAGE_SIZE=20;
+function moveWatchToPage(code,targetPage){
+ const all=orderedCodes(),from=all.indexOf(code);
+ if(from<0)return;
+ const pageCount=Math.ceil(all.length/WATCH_PAGE_SIZE);
+ if(targetPage<0||targetPage>=pageCount)return;
+ all.splice(from,1);
+ const insertAt=Math.min(all.length,targetPage*WATCH_PAGE_SIZE);
+ all.splice(insertAt,0,code);
+ localStorage.setItem(ORDER_KEY,JSON.stringify(all));
+ watchPage=targetPage;
+ renderHome();renderTabsInSavedOrder();
+}
+function moveWatchToTop(code){
+ const all=orderedCodes().filter(x=>x!==code);all.unshift(code);
+ localStorage.setItem(ORDER_KEY,JSON.stringify(all));watchPage=0;
+ renderHome();renderTabsInSavedOrder();
+}
+
+let watchPage=0;
+function visibleWatchCodes(){return orderedCodes().slice(watchPage*WATCH_PAGE_SIZE,(watchPage+1)*WATCH_PAGE_SIZE)}
+function pageFromUrl(){
+ const value=new URLSearchParams(location.search).get("page");
+ const n=Number(value);
+ return value!==null&&Number.isInteger(n)&&n>=1?n-1:0;
+}
+function setWatchPage(n){
+ const total=Math.max(1,Math.ceil(orderedCodes().length/WATCH_PAGE_SIZE));
+ const next=Math.max(0,Math.min(total-1,n));
+ if(next===watchPage)return;
+ watchPage=next;
+ // Store list pagination in browser history, so mouse Back/Forward works.
+ const url=next===0?location.pathname:location.pathname+"?page="+(next+1);
+ history.pushState({view:"home",page:next},"",url);
+ renderHome();
+ const heading=document.querySelector('.homeHead');
+ if(heading)heading.scrollIntoView({block:'start',behavior:'smooth'});
+}
+function renderWatchPager(){
+ const el=document.getElementById('watchPager');if(!el)return;
+ const count=orderedCodes().length,total=Math.max(1,Math.ceil(count/WATCH_PAGE_SIZE));
+ watchPage=Math.min(watchPage,total-1);
+ el.innerHTML=`<button ${watchPage===0?'disabled':''} onclick="setWatchPage(${watchPage-1})">← 前へ</button><span>${watchPage+1} / ${total} ページ（全 ${count} 銘柄・1ページ ${WATCH_PAGE_SIZE} 件）</span><button ${watchPage>=total-1?'disabled':''} onclick="setWatchPage(${watchPage+1})">次へ →</button>`;
+}
+function orderedCodes(){
+  const base=Object.keys(D?.stocks||{});
+  let saved=[]; try{saved=JSON.parse(localStorage.getItem(ORDER_KEY)||"[]")}catch(e){}
+  const out=saved.filter(c=>base.includes(c));
+  base.forEach(c=>{if(!out.includes(c))out.push(c)});
+  return out;
+}
+function saveWatchOrder(){
+  const body=document.getElementById("watchBody"); if(!body)return;
+  const original=orderedCodes(),shown=[...body.querySelectorAll(".watchRow")].map(r=>r.dataset.code);
+  original.splice(watchPage*WATCH_PAGE_SIZE,shown.length,...shown);
+  localStorage.setItem(ORDER_KEY,JSON.stringify(original));
+}
+document.addEventListener('wheel',e=>{
+ const tabs=e.target.closest?.('#detailPage #tabs');
+ if(!tabs||tabs.scrollWidth<=tabs.clientWidth)return;
+ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){
+   e.preventDefault();tabs.scrollLeft+=e.deltaY;
+ }
+},{passive:false});
+function renderTabsInSavedOrder(){
+  const tabs=document.getElementById("tabs"); if(!tabs||!D?.stocks)return;
+  tabs.innerHTML=orderedCodes().map(k=>`<button class="tab ${k===C?"on":""}" data-c="${k}" onclick="openDetail('${k}')">${k} ${D.stocks[k].name||M[k]?.n||""}</button>`).join("");
+}
+function initSmoothOrder(){
+  const body=document.getElementById("watchBody"); if(!body)return;
+  let active=null, ghost=null, placeholder=null, pid=null, offsetY=0;
+
+  function makeGhost(row,y){
+    const r=row.getBoundingClientRect();
+    ghost=row.cloneNode(true);
+    ghost.classList.add("orderGhost");
+    ghost.style.width=r.width+"px";
+    ghost.style.left=r.left+"px";
+    ghost.style.top=(y-offsetY)+"px";
+    document.body.appendChild(ghost);
+  }
+  function endDrag(){
+    if(!active)return;
+    if(placeholder && placeholder.parentNode) placeholder.replaceWith(active);
+    active.classList.remove("orderSource");
+    ghost?.remove(); ghost=null; placeholder=null;
+    document.body.classList.remove("orderingNow");
+    saveWatchOrder(); renderTabsInSavedOrder();
+    active=null; pid=null;
+  }
+
+  body.querySelectorAll(".watchRow").forEach(row=>{
+    const handle=row.querySelector(".smoothHandle"); if(!handle)return;
+    handle.onpointerdown=e=>{
+      if(e.pointerType==="mouse"&&e.button!==0)return;
+      e.preventDefault();e.stopPropagation();
+      const r=row.getBoundingClientRect();
+      active=row;pid=e.pointerId;offsetY=e.clientY-r.top;
+      handle.setPointerCapture(pid);
+      placeholder=document.createElement("tr");
+      placeholder.className="orderPlaceholder";
+      const td=document.createElement("td");td.colSpan=row.children.length;td.style.height=r.height+"px";
+      placeholder.appendChild(td);
+      row.after(placeholder);
+      row.classList.add("orderSource");
+      makeGhost(row,e.clientY);
+      document.body.classList.add("orderingNow");
+    };
+    handle.onpointermove=e=>{
+      if(!active||e.pointerId!==pid)return;
+      e.preventDefault();
+      if(ghost) ghost.style.top=(e.clientY-offsetY)+"px";
+      const rows=[...body.querySelectorAll(".watchRow")].filter(x=>x!==active);
+      let placed=false;
+      for(const r of rows){
+        const b=r.getBoundingClientRect();
+        if(e.clientY < b.top+b.height/2){
+          r.before(placeholder); placed=true; break;
+        }
+      }
+      if(!placed) body.appendChild(placeholder);
+    };
+    handle.onpointerup=e=>{if(active&&e.pointerId===pid){e.preventDefault();e.stopPropagation();endDrag()}};
+    handle.onpointercancel=endDrag;
+    handle.onclick=e=>{e.preventDefault();e.stopPropagation()};
+  });
+}
+
+let marketRefreshStarted=false;
+function renderHome(){
+  const tb=document.getElementById('watchBody'); if(!tb || !D?.stocks) return;
+  homeRendered=true;
+  const generation=++watchRenderGeneration;
+  const order=visibleWatchCodes();
+  tb.innerHTML=order.map(code=>{
+    const s=D.stocks?.[code]; if(!s) return '';
+    const a=(s.history||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)), x=a[a.length-1]||{}, p=a.length>1?a[a.length-2]:x;
+    const dp=p.ratio?pctChange(x.ratio,p.ratio):0;
+    const cls=dp>=0?'up':'down', arrow=dp>=0?'▲':'▼';
+    return `<tr class="watchRow" data-code="${code}" onclick="openDetail('${code}')">
+      <td class="stockIdentity"><span class="smoothHandle" title="つかんで並べ替え" onclick="event.stopPropagation()">⠿</span><span class="stockCode">${code}</span><select class="watchMovePage" aria-label="${code}の移動先" title="別ページへ移動" onclick="event.stopPropagation()" onchange="event.stopPropagation();if(this.value==='top')moveWatchToTop('${code}');else if(this.value!=='')moveWatchToPage('${code}',Number(this.value));">
+<option value="">移動…</option><option value="top">先頭へ</option>${Array.from({length:Math.ceil(orderedCodes().length/WATCH_PAGE_SIZE)},(_,i)=>`<option value="${i}">${i+1}ページへ</option>`).join('')}</select><span class="stockName">${s.name}</span></td>
+      <td><div class="homeAbsPrice" id="hp_${code}">—</div></td>
+      <td><div class="homeAbsMove" id="hc_${code}">取得中</div></td>
+      <td><canvas class="rowSpark" id="rsp_${code}" width="180" height="52"></canvas></td>
+      <td><span class="homeRatio">${Number.isFinite(Number(x.ratio))&&x.ratio!=null?Number(x.ratio).toFixed(2)+' 倍':'—'}</span></td>
+      <td><span class="homeDelta ${cls}">${arrow} ${dp>=0?'+':''}${dp.toFixed(1)}%</span></td>
+    </tr>`;
+  }).join('');
+  initSmoothOrder();
+  renderWatchPager();
+  loadHomePrices(generation);
+  if(!marketRefreshStarted){marketRefreshStarted=true;loadMarkets().finally(()=>marketRefreshStarted=false)}
+  loadIntradayCharts();
+}
+
+// Ensure the new home is populated after the original data loader finishes.
+setTimeout(()=>{ if(D?.stocks && !homeRendered) renderHome(); },300);
+
+
+
+function formatStockMove(j){
+  if(!j || j.pct==null)return "—";
+  const up=j.pct>=0, sign=up?"+":"";
+  const yen=j.change==null?"":`${sign}${Math.round(j.change).toLocaleString("ja-JP")}円 `;
+  return `${up?"▲":"▼"} ${yen}(${sign}${Number(j.pct).toFixed(2)}%)`;
+}
+
+
+function drawMarketChart(id,points,prev){
+  const c=document.getElementById(id); if(!c||!points||points.length<2)return;
+  const ctx=c.getContext("2d"), w=c.width, hh=c.height;
+  ctx.clearRect(0,0,w,hh);
+  const vals=points.map(p=>Array.isArray(p)?p[1]:p).filter(Number.isFinite);
+  if(vals.length<2)return;
+  const base=(prev!=null?Number(prev):vals[0]);
+  let mn=Math.min(base,...vals), mx=Math.max(base,...vals), pad=(mx-mn)*.12||1;
+  mn-=pad; mx+=pad;
+  const Y=v=>hh-4-(v-mn)*(hh-8)/(mx-mn);
+  const X=i=>3+i*(w-6)/(vals.length-1);
+  const by=Y(base);
+  // previous-close dotted baseline
+  ctx.save(); ctx.setLineDash([3,3]); ctx.strokeStyle="#6f8da8"; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,by);ctx.lineTo(w,by);ctx.stroke();ctx.restore();
+  // soft area fill, green above / warm pink below baseline
+  ctx.save();ctx.beginPath();ctx.rect(0,0,w,Math.max(0,by));ctx.clip();
+  let g=ctx.createLinearGradient(0,0,0,hh);g.addColorStop(0,"rgba(74,177,103,.32)");g.addColorStop(1,"rgba(74,177,103,.05)");
+  ctx.beginPath();ctx.moveTo(X(0),by);vals.forEach((v,i)=>ctx.lineTo(X(i),Y(v)));ctx.lineTo(X(vals.length-1),by);ctx.closePath();ctx.fillStyle=g;ctx.fill();ctx.restore();
+  ctx.save();ctx.beginPath();ctx.rect(0,by,w,hh-by);ctx.clip();
+  let r=ctx.createLinearGradient(0,0,0,hh);r.addColorStop(0,"rgba(221,86,103,.05)");r.addColorStop(1,"rgba(221,86,103,.28)");
+  ctx.beginPath();ctx.moveTo(X(0),by);vals.forEach((v,i)=>ctx.lineTo(X(i),Y(v)));ctx.lineTo(X(vals.length-1),by);ctx.closePath();ctx.fillStyle=r;ctx.fill();ctx.restore();
+  // price line switches visually around baseline by drawing two clipped passes
+  for(const [top,col] of [[true,"#30975a"],[false,"#cf4c63"]]){
+    ctx.save();ctx.beginPath();ctx.rect(0,top?0:by,w,top?by:hh-by);ctx.clip();
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();
+    vals.forEach((v,i)=>{if(i===0)ctx.moveTo(X(i),Y(v));else ctx.lineTo(X(i),Y(v))});ctx.stroke();ctx.restore();
+  }
+}
+async function loadIntradayCharts(){
+  const indices={nikkei:"^N225",topix:"998405.T",sox:"^SOX",fang:"^NYFANG"};
+  for(const [key,symbol] of Object.entries(indices)){
+    try{
+      const j=await (await fetch("/api/intraday?symbol="+encodeURIComponent(symbol),{cache:"no-store"})).json();
+      if(j.ok && j.points?.length>=2){drawMarketChart("sp_"+key,j.points,j.prev);continue;}
+    }catch(e){}
+    if(key==="topix"){
+      try{
+        for(const sym of ["998405.T","^TOPX"]){
+          const d=await (await fetch("/api/index-history?symbol="+encodeURIComponent(sym),{cache:"no-store"})).json();
+          if(d.ok && d.points?.length>=2){drawMarketChart("sp_topix",d.points,d.prev);document.getElementById("sp_topix").title="日足推移（場中チャートが取得できない場合の代替）";break;}
+        }
+      }catch(e){}
+    }
+  }
+  // The Growth 250 card shows actual daily cash-index closes, not an ETF proxy.
+  try{
+    const g=await (await fetch('/api/growth-history?t='+Date.now(),{cache:'no-store'})).json();
+    const canvas=document.getElementById('sp_growth');
+    if(g.ok && g.points?.length>=2){
+      drawMarketChart('sp_growth',g.points,g.prev);
+      canvas.title='グロース250 日足（'+g.dates[0]+'～'+g.dates[g.dates.length-1]+'） / '+g.source;
+    }else if(canvas){canvas.title='日足取得失敗: '+(g.error||'データ不足');}
+  }catch(e){const canvas=document.getElementById('sp_growth');if(canvas)canvas.title='日足通信失敗: '+e.message;}
+
+  const generation=watchRenderGeneration;
+  await parallelWatch(visibleWatchCodes(),async code=>{
+    try{
+      let cached=watchSparkCache.get(code);
+      if(!cached||Date.now()-cached.at>120000){
+        const r=await fetch("/api/intraday?code="+encodeURIComponent(code),{cache:"no-store"});
+        const value=await r.json();
+        cached={value,at:Date.now()};if(value.ok)watchSparkCache.set(code,cached);
+      }
+      if(generation===watchRenderGeneration&&cached.value.ok)
+        drawMarketChart("rsp_"+code,cached.value.points,cached.value.prev);
+    }catch(e){console.debug("Sparkline unavailable",code,e)}
+  });
+}
+
+let foundStockForAdd=null;
+let detailCandidate=null;
+async function searchStock(){
+  const inp=document.getElementById("stockSearch"),msg=document.getElementById("searchMsg");
+  const q=(inp?.value||"").trim();if(!q)return;
+  msg.textContent="検索中…";
+  try{
+    const j=await (await fetch("/api/search?q="+encodeURIComponent(q),{cache:"no-store"})).json();
+    if(!j.ok)throw Error(j.error||"見つかりません");
+    detailCandidate={code:String(j.code),name:j.name||String(j.code)};
+    msg.textContent="";
+    openDetailCandidate(detailCandidate,true);
+  }catch(e){msg.textContent="見つかりませんでした";}
+}
+async function removeRegisteredStock(code){
+  code=String(code);
+  if(!confirm(code+" を登録銘柄から外しますか？"))return;
+  try{
+    const r=await fetch("/api/watch/remove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})});
+    const j=await r.json();if(!j.ok)throw Error(j.error||"削除できませんでした");
+    D=await J("/api/data");
+    try{
+      const key="seidoWatchOrderV13";
+      const a=JSON.parse(localStorage.getItem(key)||"[]").filter(x=>String(x)!==code);
+      localStorage.setItem(key,JSON.stringify(a));
+    }catch(e){}
+    renderHome();renderTabsInSavedOrder();
+  }catch(e){alert("登録解除エラー: "+e.message)}
+}
+
+function restoreRouteFromUrl(){
+  const params=new URLSearchParams(location.search);
+  const code=params.get("code");
+  if(code && D?.stocks?.[code]){openDetail(code,false);return}
+  const next=pageFromUrl();
+  if(watchPage!==next){watchPage=next;renderHome()}
+  showHome(false);
+}
+window.addEventListener("popstate",restoreRouteFromUrl);
+function restoreRoute(){restoreRouteFromUrl()}
+
+
+function drawWeeklyPrice(points){
+  const c=document.getElementById("priceCv"); if(!c||!points||points.length<2)return;
+  const ctx=c.getContext("2d");
+  const W=c.width=c.clientWidth*devicePixelRatio, H=c.height=c.clientHeight*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  const w=c.clientWidth,h=c.clientHeight, pad={l:52,r:14,t:10,b:24};
+  const pts=points.slice(-65), vals=pts.map(x=>x.close);
+  let mn=Math.min(...vals),mx=Math.max(...vals),gap=(mx-mn)*.12||1;mn-=gap;mx+=gap;
+  const X=i=>pad.l+i*(w-pad.l-pad.r)/(pts.length-1);
+  const Y=v=>pad.t+(mx-v)*(h-pad.t-pad.b)/(mx-mn);
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle="#dce5ec";ctx.lineWidth=1;
+  for(let i=0;i<4;i++){let y=pad.t+i*(h-pad.t-pad.b)/3;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()}
+  const grad=ctx.createLinearGradient(0,pad.t,0,h-pad.b);
+  grad.addColorStop(0,"rgba(46,122,180,.24)");grad.addColorStop(1,"rgba(46,122,180,.02)");
+  ctx.beginPath();ctx.moveTo(X(0),h-pad.b);pts.forEach((p,i)=>ctx.lineTo(X(i),Y(p.close)));ctx.lineTo(X(pts.length-1),h-pad.b);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(i),Y(p.close)):ctx.moveTo(X(i),Y(p.close)));ctx.strokeStyle="#236da5";ctx.lineWidth=2.4;ctx.stroke();
+  ctx.fillStyle="#61778b";ctx.font="11px sans-serif";
+  ctx.textAlign="right";ctx.fillText(Math.round(mx).toLocaleString("ja-JP")+"円",pad.l-6,pad.t+8);
+  ctx.fillText(Math.round(mn).toLocaleString("ja-JP")+"円",pad.l-6,h-pad.b);
+  ctx.textAlign="center";
+  [0,Math.floor((pts.length-1)/2),pts.length-1].forEach(i=>{
+    const d=pts[i].date.slice(5).replace("-","/");
+    ctx.fillText(d,X(i),h-6);
+  });
+}
+async function loadWeeklyPrice(code){
+  try{
+    const j=await (await fetch("/api/weekly?code="+encodeURIComponent(code),{cache:"no-store"})).json();
+    if(j.ok)drawWeeklyPrice(j.history);
+  }catch(e){}
+}
+async function searchDetailStock(){
+  const inp=document.getElementById("detailSearch"),msg=document.getElementById("detailSearchMsg");
+  const q=(inp?.value||"").trim();if(!q)return;
+  msg.textContent="検索中…";
+  try{
+    const j=await (await fetch("/api/search?q="+encodeURIComponent(q),{cache:"no-store"})).json();
+    if(!j.ok)throw Error();
+    msg.textContent="";inp.value="";
+    openDetailCandidate({code:String(j.code),name:j.name||String(j.code)},true);
+  }catch(e){msg.textContent="見つかりません";}
+}
+
+</script>
+</div>
+
+
+<div id="candlePopup" hidden>
+ <div class="candleBackdrop" aria-hidden="true"></div>
+ <div id="candleDrag"><strong id="candleTitle">日足ローソク足</strong>
+ <select id="candleRange" aria-label="表示期間"><option value="1mo">1か月</option><option value="3mo" selected>3か月</option><option value="6mo">6か月</option><option value="1y">1年</option></select>
+ <button type="button" id="candleClose" aria-label="閉じる">× 閉じる</button></div>
+ <canvas id="candleCanvas"></canvas><div id="candleHoverInfo" aria-live="off" style="font-size:13px;font-weight:600;color:#fff;min-height:22px;text-shadow:0 1px 3px #000;padding:3px 2px">ローソク足にマウスを合わせると4本値・出来高を表示</div>
+ 
+ <div id="candleStatus">株価データを取得中…</div>
+</div>
+<script>
+(function(){
+ const pop=document.getElementById('candlePopup'),cv=document.getElementById('candleCanvas'),ctx=cv.getContext('2d');
+ const hoverInfo=document.getElementById('candleHoverInfo');
+ const status=document.getElementById('candleStatus'),title=document.getElementById('candleTitle'),range=document.getElementById('candleRange');
+ let activeCode='',rows=[],token=0,hoverIndex=-1;
+ function draw(){
+   const rect=cv.getBoundingClientRect(),w=Math.max(280,Math.round(rect.width)),hh=Math.max(180,Math.round(rect.height));
+   const dpr=Math.min(2,window.devicePixelRatio||1);cv.width=w*dpr;cv.height=hh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,hh);
+   if(!rows.length)return;
+   const left=58,right=12,top=12,bottom=27,volGap=24,volH=Math.round(hh*.20),
+         priceBottom=hh-bottom-volGap-volH,plotW=w-left-right,plotH=priceBottom-top;
+   const hi=Math.max(...rows.map(x=>x.high)),lo=Math.min(...rows.map(x=>x.low)),pad=Math.max((hi-lo)*.06,1),mx=hi+pad,mn=lo-pad;
+   const yy=v=>top+(mx-v)/(mx-mn)*plotH;
+   ctx.shadowColor='rgba(0,0,0,.85)';ctx.shadowBlur=2;ctx.font='12px sans-serif';ctx.fillStyle='#dbeafe';ctx.strokeStyle='#ffffff25';ctx.lineWidth=1;
+   for(let k=0;k<=4;k++){let v=mn+(mx-mn)*(4-k)/4,y=yy(v);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.fillText(Math.round(v).toLocaleString('ja-JP'),2,y+4)}
+   ctx.shadowBlur=0;const step=plotW/rows.length,bw=Math.max(1,Math.min(11,step*.64));
+   // MarketSpeed II style: bullish = yellow hollow body, bearish = cyan solid.
+   // Draw wicks OUTSIDE the real body only, never through its center.
+   rows.forEach((p,i)=>{
+     const x=left+(i+.5)*step,up=p.close>=p.open;
+     const color=up?'#f5dc48':'#8eefff';
+     const bodyTop=yy(Math.max(p.open,p.close)),bodyBottom=yy(Math.min(p.open,p.close));
+     const bodyH=Math.max(1.8,bodyBottom-bodyTop);
+     const bodyY=bodyBottom-bodyTop<1.8?(bodyTop+bodyBottom)/2-.9:bodyTop;
+     ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.shadowBlur=0;
+     // Upper and lower wicks terminate at the body edges.
+     ctx.beginPath();
+     ctx.moveTo(x,yy(p.high));ctx.lineTo(x,bodyY);
+     ctx.moveTo(x,bodyY+bodyH);ctx.lineTo(x,yy(p.low));
+     ctx.stroke();
+     ctx.fillStyle=up?'rgba(245,220,72,.16)':'#8eefff';
+     ctx.fillRect(x-bw/2,bodyY,bw,bodyH);
+     ctx.strokeRect(x-bw/2,bodyY,bw,bodyH);
+   });
+   // Volume bars use the same time scale as candlesticks.
+   const volumeTop=priceBottom+volGap,volumeBase=hh-bottom;
+   const validVol=rows.map(p=>Number.isFinite(Number(p.volume))?Math.max(0,Number(p.volume)):null);
+   const maxVol=Math.max(1,...validVol.filter(v=>v!==null));
+   ctx.shadowBlur=0;ctx.font='11px sans-serif';ctx.fillStyle='#dbeafe';
+   ctx.fillText('出来高',left,volumeTop-7);
+   ctx.fillText(maxVol>=1e8?(maxVol/1e8).toFixed(1)+'億株':maxVol>=1e4?Math.round(maxVol/1e4)+'万株':maxVol.toLocaleString('ja-JP'),2,volumeTop+9);
+   ctx.strokeStyle='rgba(255,255,255,.3)';ctx.beginPath();ctx.moveTo(left,volumeBase);ctx.lineTo(w-right,volumeBase);ctx.stroke();
+   rows.forEach((p,i)=>{
+     const v=validVol[i];if(v===null)return;
+     const x=left+(i+.5)*step,barH=Math.max(1,(v/maxVol)*(volH-3));
+     ctx.fillStyle=p.close>=p.open?'#f5dc48':'#8eefff';
+     ctx.fillRect(x-bw/2,volumeBase-barH,bw,barH);
+   });
+   if(hoverIndex>=0&&hoverIndex<rows.length){
+     const x=left+(hoverIndex+.5)*step;
+     ctx.shadowBlur=0;ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+     ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,volumeBase);ctx.stroke();ctx.setLineDash([]);
+   }
+   ctx.shadowColor='rgba(0,0,0,.85)';ctx.shadowBlur=3;ctx.fillStyle='#ffffff';ctx.fillText(rows[0].date.slice(5),left,hh-8);let last=rows[rows.length-1].date.slice(5);ctx.fillText(last,w-54,hh-8);
+ }
+ async function loadCandles(){
+   const code=activeCode,request=++token;status.textContent='日足4本値を取得中…';rows=[];hoverIndex=-1;hoverInfo.textContent='ローソク足にマウスを合わせると4本値・出来高を表示';draw();
+   try{const response=await fetch('/api/candles?code='+encodeURIComponent(code)+'&range='+range.value+'&t='+Date.now(),{cache:'no-store'});
+     const j=await response.json();if(request!==token||code!==activeCode)return;
+     if(!j.ok)throw Error(j.error||'データ取得失敗');
+     rows=j.candles||[];hoverIndex=-1;document.getElementById('candleHoverInfo').textContent='ローソク足にマウスを合わせると4本値・出来高を表示';draw();status.textContent=j.source+' / '+rows.length+'営業日 / '+rows[rows.length-1].date;
+   }catch(e){if(request===token)status.textContent='日足データ取得不可: '+e.message}
+ }
+ function open(){if(typeof C==='undefined'||!C||! /^(?:[0-9]{4}|[0-9]{3}[A-Z])$/.test(String(C).toUpperCase()))return;
+   activeCode=String(C).toUpperCase();title.textContent=activeCode+' '+((typeof M!=='undefined'&&M[activeCode]&&M[activeCode].n)||'')+' 日足';
+   pop.hidden=false;
+   // Center the chart in the visible browser area, independent of price chart position.
+   // This intentionally overlaps the right-hand margin-ratio panel when needed.
+   const w=pop.offsetWidth,h=pop.offsetHeight,margin=10;
+   const x=Math.max(margin,Math.round((window.innerWidth-w)/2));
+   const y=Math.max(margin,Math.round((window.innerHeight-h)/2));
+   pop.style.right='auto';pop.style.left=x+'px';pop.style.top=y+'px';
+   loadCandles();
+ }
+ function inspectCandle(e){
+   if(!rows.length)return;
+   const r=cv.getBoundingClientRect(),x=e.clientX-r.left,left=48,right=10;
+   const plotW=r.width-left-right;
+   const index=Math.floor((x-left)/plotW*rows.length);
+   if(x<left||x>r.width-right||index<0||index>=rows.length){clearHover();return}
+   if(index===hoverIndex)return;
+   hoverIndex=index;
+   const c=rows[index],fmt=n=>Number(n).toLocaleString('ja-JP',{maximumFractionDigits:2});
+   hoverInfo.textContent=c.date+'　始 '+fmt(c.open)+'　高 '+fmt(c.high)+'　安 '+fmt(c.low)+'　終 '+fmt(c.close)+' 円　出来高 '+(c.volume==null?'不明':Number(c.volume).toLocaleString('ja-JP')+'株');
+   draw();
+ }
+ function clearHover(){
+   if(hoverIndex<0)return;
+   hoverIndex=-1;hoverInfo.textContent='ローソク足にマウスを合わせると4本値・出来高を表示';draw();
+ }
+ cv.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')inspectCandle(e)});
+ cv.addEventListener('pointermove',inspectCandle);
+ cv.addEventListener('pointerleave',clearHover);
+ document.getElementById('priceCv').addEventListener('click',open);
+ document.getElementById('candleClose').addEventListener('click',()=>{pop.hidden=true;token++});
+ range.addEventListener('change',loadCandles);
+ // Switch candle period by mouse wheel while the pointer is over the period selector.
+ // Prevent the page from scrolling; fire the same change event as manual selection.
+ range.addEventListener('wheel',e=>{
+   e.preventDefault();
+   if(!e.deltaY)return;
+   const next=Math.max(0,Math.min(range.options.length-1,range.selectedIndex+(e.deltaY>0?1:-1)));
+   if(next!==range.selectedIndex){
+     range.selectedIndex=next;
+     range.dispatchEvent(new Event('change',{bubbles:true}));
+   }
+ },{passive:false});
+ let drag=null;document.getElementById('candleDrag').addEventListener('pointerdown',e=>{
+   if(e.target.closest('button,select'))return;
+   const r=pop.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:r.left,top:r.top,id:e.pointerId};
+   e.currentTarget.setPointerCapture(e.pointerId);
+ });
+ document.getElementById('candleDrag').addEventListener('pointermove',e=>{
+  if(!drag)return;pop.style.left=Math.max(0,Math.min(innerWidth-pop.offsetWidth,drag.left+e.clientX-drag.x))+'px';
+  pop.style.top=Math.max(0,Math.min(innerHeight-45,drag.top+e.clientY-drag.y))+'px';pop.style.right='auto';
+ });
+ document.getElementById('candleDrag').addEventListener('pointerup',()=>drag=null);
+ window.addEventListener('resize',()=>{if(!pop.hidden)draw()});
+})();
+</script></body></html>
