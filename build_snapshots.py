@@ -35,7 +35,7 @@ for i,code in enumerate(stocks,1):
     for endpoint in ("price","stock-info","weekly","preview-history","preview-margin","intraday","candles"):
         params={"code":code}
         if endpoint=="candles":
-            for rng in ("1m","3m","6m","1y"):
+            for rng in ("1mo","3mo","6mo","1y"):
                 p=urllib.parse.urlencode({"code":code,"range":rng})
                 dump(f"candles_{code}_{rng}",call("/api/candles?"+p))
         else:
